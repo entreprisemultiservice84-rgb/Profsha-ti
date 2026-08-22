@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#071445">
+<title>PROFHaiti Premium — Le compagnon du professeur haïtien</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#00209F; --blue-d:#071445; --blue-ink:#0b2f8f;
+  --red:#D21034; --red-d:#a30d28;
+  --gold:#FFC72C; --gold-d:#c79400;
+  --paper:#eef2fa; --ink:#101a33; --mut:#5b6784; --line:#dde4f2;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Instrument Sans',system-ui,sans-serif;color:var(--ink);
+  background:var(--paper) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="46" height="46"><path d="M23 5l3.2 8.6L35 17l-8.8 3.4L23 29l-3.2-8.6L11 17l8.8-3.4z" fill="%2300209F" fill-opacity="0.05"/></svg>');
+  min-height:100vh;
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(700px 420px at 92% -6%,rgba(210,16,52,.10),transparent 60%),
+             radial-gradient(760px 480px at -8% 104%,rgba(0,32,159,.12),transparent 60%),
+             radial-gradient(520px 300px at 55% 0,rgba(255,199,44,.10),transparent 65%);
+  animation:glow 16s ease-in-out infinite alternate}
+@keyframes glow{to{opacity:.55}}
+#page{position:relative;z-index:1}
+h1,h2,h3,h4,.disp{font-family:'Bricolage Grotesque',sans-serif;line-height:1.15}
+a{color:var(--blue)}
+.hide{display:none!important}
+.flagbar{height:6px;background:linear-gradient(90deg,var(--blue) 0 50%,var(--red) 50% 100%)}
+
+/* ---------- ÉCRAN DE VERROUILLAGE ---------- */
+#lock{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:var(--blue-d);overflow:hidden;transition:opacity .6s}
+#lock.off{opacity:0;pointer-events:none}
+#lock::before{content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(45deg,transparent 0 26px,rgba(255,255,255,.03) 26px 52px);
+  animation:slide 26s linear infinite}
+@keyframes slide{to{background-position:740px 0}}
+#lock::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(600px 380px at 85% 8%,rgba(210,16,52,.22),transparent 60%),
+             radial-gradient(600px 380px at 10% 95%,rgba(255,199,44,.14),transparent 60%)}
+.lock-card{position:relative;z-index:2;background:#fff;border-radius:18px;max-width:520px;width:100%;
+  padding:34px 30px 26px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,.45);overflow:hidden}
+.lock-flag{position:absolute;top:0;left:0;right:0;height:8px;
+  background:linear-gradient(90deg,var(--blue) 0 50%,var(--red) 50% 100%)}
+.lock-ico{width:76px;height:76px;border-radius:50%;background:var(--blue);display:grid;place-items:center;
+  font-size:2rem;color:#fff;margin:6px auto 12px;position:relative}
+.lock-ico::after{content:"";position:absolute;inset:-9px;border-radius:50%;
+  border:2px solid rgba(0,32,159,.45);animation:pulse 2s infinite}
+@keyframes pulse{0%{transform:scale(.88);opacity:1}100%{transform:scale(1.35);opacity:0}}
+.lock-motto{font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;color:var(--red)}
+.lock-card h2{font-size:1.9rem;color:var(--blue-d);margin:6px 0 10px}
+.lock-txt{color:var(--mut);line-height:1.55;margin-bottom:18px}
+.lock-txt b{color:var(--ink)}
+.lock-help{margin-top:18px;font-size:.9rem;color:var(--mut);line-height:1.6}
+.lock-help a{color:var(--blue);font-weight:700;text-decoration:none;border-bottom:2px solid var(--gold)}
+#codeForm{margin-top:16px;text-align:left}
+#codeIn{width:100%;padding:14px 16px;font-size:1.15rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  border:2px solid var(--line);border-radius:12px;font-family:'Bricolage Grotesque',sans-serif;color:var(--blue-d)}
+#codeIn:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 4px rgba(0,32,159,.12)}
+.err{color:var(--red);font-size:.85rem;font-weight:600;min-height:1.2em;margin-top:6px}
+.frow{display:flex;gap:10px;margin-top:8px}
+.shake{animation:shake .5s}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
+
+/* ---------- BOUTONS ---------- */
+.btn{border:none;border-radius:12px;padding:13px 22px;font-weight:700;font-size:1rem;cursor:pointer;
+  font-family:'Instrument Sans',sans-serif;transition:transform .18s,box-shadow .18s,background .18s;position:relative;overflow:hidden}
+.btn:hover{transform:translateY(-2px);box-shadow:0 10px 22px rgba(7,20,69,.22)}
+.btn:active{transform:scale(.96)}
+.btn.red{background:var(--red);color:#fff}
+.btn.red:hover{background:var(--red-d)}
+.btn.blue{background:var(--blue);color:#fff}
+.btn.green{background:#177245;color:#fff}
+.btn.ghost{background:#eef2fa;color:var(--ink)}
+.btn.big{width:100%;padding:16px;font-size:1.05rem;letter-spacing:.04em}
+.btn.big::after{content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;
+  background:linear-gradient(100deg,transparent,rgba(255,255,255,.35),transparent);animation:sheen 3.2s infinite}
+@keyframes sheen{0%{left:-80%}55%,100%{left:130%}}
+
+/* ---------- HEADER ---------- */
+header{background:linear-gradient(135deg,var(--blue-d) 0%,var(--blue-ink) 100%);color:#fff;position:relative;overflow:hidden}
+header::after{content:"☆ 1804";position:absolute;right:-14px;bottom:-34px;font-family:'Bricolage Grotesque',sans-serif;
+  font-size:7rem;font-weight:800;color:rgba(255,255,255,.05);pointer-events:none}
+.hwrap{max-width:1180px;margin:0 auto;padding:22px 22px 10px;display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px}
+.logo{width:52px;height:52px;border-radius:14px;background:var(--red);display:grid;place-items:center;font-size:1.6rem;
+  box-shadow:0 8px 20px rgba(210,16,52,.4);transform:rotate(-4deg)}
+.brand h1{font-size:1.9rem;font-weight:800;letter-spacing:-.01em}
+.brand h1 span{color:var(--gold)}
+.prem{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--gold)}
+.prem em{display:block;font-style:normal;color:#b9c6ef;letter-spacing:.08em;margin-top:3px;font-weight:500;text-transform:none}
+.hchips{display:flex;gap:10px;flex-wrap:wrap}
+.chip-h{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.22);border-radius:999px;
+  padding:8px 16px;font-size:.85rem;font-weight:700}
+.chip-h.gold{background:var(--gold);color:var(--blue-d);border-color:var(--gold)}
+.motto{max-width:1180px;margin:0 auto;padding:0 22px 16px;font-size:.78rem;letter-spacing:.24em;text-transform:uppercase;color:#8fa3d9}
+.motto b{color:var(--gold)}
+
+/* ---------- ONGLETS ---------- */
+#tabs{position:sticky;top:0;z-index:30;background:#fff;box-shadow:0 4px 18px rgba(7,20,69,.10);
+  display:flex;overflow-x:auto;scrollbar-width:thin}
+.tab{flex:0 0 auto;border:none;background:none;padding:15px 18px;font-size:.92rem;font-weight:700;color:var(--mut);
+  cursor:pointer;font-family:'Instrument Sans',sans-serif;position:relative;transition:color .2s,background .2s;white-space:nowrap}
+.tab::after{content:"";position:absolute;left:14px;right:14px;bottom:0;height:3px;border-radius:3px 3px 0 0;
+  background:var(--red);transform:scaleX(0);transition:transform .25s}
+.tab:hover{color:var(--blue);background:#f2f6ff}
+.tab.act{color:var(--blue)}
+.tab.act::after{transform:scaleX(1)}
+
+/* ---------- SECTIONS ---------- */
+.sec{display:none}
+.sec.on{display:block;animation:fadeUp .45s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.wrap{max-width:1180px;margin:0 auto;padding:36px 22px 64px}
+.kick{color:var(--red);font-size:.75rem;letter-spacing:.22em;text-transform:uppercase;font-weight:700;margin-bottom:8px}
+.sec h2{font-size:clamp(1.7rem,3.4vw,2.5rem);color:var(--blue-d);margin-bottom:8px}
+.sub{color:var(--mut);max-width:760px;line-height:1.6;margin-bottom:26px}
+.grp{font-family:'Bricolage Grotesque',sans-serif;font-size:1.25rem;color:var(--blue-d);margin:30px 0 14px;
+  padding-left:12px;border-left:5px solid var(--gold)}
+.blk{font-size:1.35rem;color:var(--blue-d);margin:34px 0 16px}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .6s cubic-bezier(.2,.7,.3,1),transform .6s cubic-bezier(.2,.7,.3,1)}
+.rv.in{opacity:1;transform:none}
+
+/* ---------- ACCUEIL ---------- */
+.bonjou{font-size:clamp(2rem,4.5vw,3rem);font-weight:800;color:var(--blue-d)}
+.bonjou span{display:inline-block;animation:wave 2.4s infinite;transform-origin:70% 70%}
+@keyframes wave{0%,60%,100%{transform:rotate(0)}70%,90%{transform:rotate(16deg)}80%{transform:rotate(-8deg)}}
+.lead{color:var(--mut);margin:8px 0 22px;line-height:1.6}
+.prov{background:linear-gradient(135deg,var(--blue-d),var(--blue-ink));color:#fff;border-radius:16px;padding:22px 24px;
+  display:flex;align-items:center;gap:18px;justify-content:space-between;margin-bottom:26px;
+  box-shadow:0 14px 34px rgba(7,20,69,.28)}
+.prov-tag{font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;font-weight:700;color:var(--gold)}
+.prov-kr{font-family:'Bricolage Grotesque',sans-serif;font-size:1.35rem;font-weight:700;margin:8px 0 4px}
+.prov-fr{color:#b9c6ef;font-size:.95rem;font-style:italic}
+#provBtn{background:var(--gold);border:none;width:46px;height:46px;border-radius:50%;font-size:1.3rem;font-weight:800;
+  color:var(--blue-d);cursor:pointer;flex:0 0 auto;transition:transform .4s,background .2s}
+#provBtn:hover{background:#ffd75e}
+#provBtn:active{transform:rotate(180deg) scale(.9)}
+.subpanel{background:#fff;border:1px solid var(--line);border-radius:16px;padding:20px;margin-bottom:8px}
+.tag{display:inline-block;background:var(--red);color:#fff;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:700;border-radius:999px;padding:6px 14px;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px 12px;text-align:center;transition:transform .2s}
+.stat:hover{transform:translateY(-3px)}
+.stat b{font-family:'Bricolage Grotesque',sans-serif;font-size:2.3rem;font-weight:800;color:var(--blue);display:block;line-height:1}
+.stat.hot b{color:var(--red)}
+.stat span{font-size:.74rem;letter-spacing:.06em;text-transform:uppercase;font-weight:600;color:var(--mut);display:block;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:16px}
+.mods.two{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.mod{background:#fff;border-radius:16px;padding:22px 20px;border:1px solid var(--line);border-top:5px solid var(--sc,var(--blue));
+  cursor:pointer;transition:transform .25s,box-shadow .25s;display:flex;flex-direction:column;gap:8px}
+.mod:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(7,20,69,.16)}
+.mod .ico{font-size:2.1rem}
+.mod h3{font-size:1.15rem;color:var(--blue-d)}
+.mod p{color:var(--mut);font-size:.92rem;line-height:1.55;flex:1}
+.mod .go{color:var(--red);font-weight:700;font-size:.9rem}
+.mod:hover .go{letter-spacing:.04em}
+.s-maths{--sc:#0b2f8f}.s-phys{--sc:#a4132c}.s-lang{--sc:#b77902}.s-lit{--sc:#8f2d56}
+.s-soc{--sc:#7a4a00}.s-svt{--sc:#177245}.s-ped{--sc:#274156}
+
+/* ---------- CARTES FLIP ---------- */
+.flip{perspective:1100px;cursor:pointer;transition:transform .25s}
+.flip:hover{transform:translateY(-4px)}
+.flip-in{display:grid;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.2,.7,.3,1.05)}
+.flip.on .flip-in{transform:rotateY(180deg)}
+.ff{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:14px;
+  padding:20px 18px;display:flex;flex-direction:column;gap:9px;box-shadow:0 8px 20px rgba(10,20,60,.13);position:relative}
+.ff.front{background:linear-gradient(160deg,var(--sc,#0b2f8f) 0%,#0a1338 155%);color:#fff;justify-content:center;min-height:170px}
+.ff.back{transform:rotateY(180deg);background:#fff;border:2px solid var(--sc,#0b2f8f);color:var(--ink);overflow:auto}
+.ff .chip{position:absolute;top:12px;right:12px;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+  background:var(--gold);color:var(--blue-d);border-radius:999px;padding:4px 10px}
+.ff.back .chip{background:var(--paper);color:var(--mut);border:1px solid var(--line)}
+.ff .ct{font-family:'Bricolage Grotesque',sans-serif;font-size:1rem;font-weight:700}
+.ff.front .ct{color:var(--gold)}
+.formula{font-family:'Bricolage Grotesque',sans-serif;font-size:1.3rem;font-weight:700;line-height:1.3}
+.ff.back p{font-size:.92rem;line-height:1.55;color:#3c4765}
+.steps{counter-reset:st;list-style:none;display:grid;gap:10px;max-width:820px}
+.steps li{counter-increment:st;background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px 14px 58px;
+  position:relative;line-height:1.55;font-size:.95rem}
+.steps li::before{content:counter(st);position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:32px;height:32px;border-radius:50%;background:var(--gold);color:var(--blue-d);
+  font-family:'Bricolage Grotesque',sans-serif;font-weight:800;display:grid;place-items:center}
+.steps li b{color:var(--blue-d)}
+.sets{margin-top:26px;background:var(--blue-d);color:#fff;border-radius:14px;padding:18px 22px;font-size:1rem;line-height:1.7}
+.sets b{color:var(--gold);font-family:'Bricolage Grotesque',sans-serif;font-size:1.15rem}
+.si-strip{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.si{background:#fff;border:1px solid var(--line);border-bottom:3px solid var(--red);border-radius:10px;
+  padding:10px 14px;font-size:.88rem;transition:transform .2s}
+.si:hover{transform:translateY(-3px)}
+.si b{font-family:'Bricolage Grotesque',sans-serif;color:var(--blue);margin-right:6px}
+
+/* ---------- TABLES ---------- */
+.tblwrap{overflow-x:auto;border-radius:14px;box-shadow:0 8px 22px rgba(10,20,60,.10);margin:14px 0}
+.tbl{width:100%;border-collapse:collapse;background:#fff;min-width:560px}
+.tbl th{background:var(--blue);color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;
+  padding:13px 16px;text-align:left;font-size:.95rem}
+.tbl td{padding:12px 16px;border-top:1px solid #e6ebf6;font-size:.93rem;line-height:1.5;vertical-align:top}
+.tbl tr:nth-child(even) td{background:#f6f8fd}
+.tbl td b{color:var(--blue-d)}
+.tbl tr{transition:background .15s}
+.tbl tbody tr:hover td{background:#fff7dd}
+
+/* ---------- PANNEAUX DIVERS ---------- */
+.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px}
+.panel h4{color:var(--blue-d);font-size:1.05rem;margin-bottom:12px}
+.panel p{color:#3c4765;font-size:.93rem;line-height:1.6;margin-bottom:8px}
+.panel.tip{border-left:5px solid var(--gold)}
+.panel.warn{border-left:5px solid var(--red)}
+.note{background:linear-gradient(135deg,#fff8e2,#fff);border:1px solid #f2dfa0;border-left:5px solid var(--gold);
+  border-radius:12px;padding:16px 18px;font-size:.93rem;line-height:1.6;margin:18px 0}
+.note b{color:var(--gold-d)}
+.mv{background:#fff;border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:12px;padding:18px;transition:transform .2s,box-shadow .2s}
+.mv:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(10,20,60,.13)}
+.mv .mv-e{font-size:1.6rem}
+.mv h4{color:var(--blue-d);margin:6px 0}
+.mv h4 small{color:var(--mut);font-weight:600}
+.mv p{font-size:.9rem;line-height:1.55;color:#3c4765}
+.quote{background:linear-gradient(135deg,var(--blue-d),var(--blue-ink));color:#fff;border-radius:14px;padding:22px 24px;position:relative;overflow:hidden}
+.quote::before{content:"«";position:absolute;top:-16px;left:8px;font-size:5rem;color:rgba(255,199,44,.25);font-family:'Bricolage Grotesque',sans-serif}
+.quote p{font-family:'Bricolage Grotesque',sans-serif;font-size:1.1rem;font-weight:700;line-height:1.45;position:relative}
+.quote span{display:block;margin-top:8px;color:var(--gold);font-size:.82rem;font-weight:600;letter-spacing:.06em}
+.quotes{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.chips{display:flex;flex-wrap:wrap;gap:9px}
+.vchip{background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-size:.88rem;transition:.2s}
+.vchip:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 6px 14px rgba(0,32,159,.12)}
+.vchip b{color:var(--blue)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:820px){.two-col{grid-template-columns:1fr}}
+
+/* ---------- TIMELINE ---------- */
+.tl{position:relative;padding-left:32px;max-width:860px}
+.tl::before{content:"";position:absolute;left:9px;top:6px;bottom:6px;width:3px;border-radius:3px;
+  background:linear-gradient(var(--blue),var(--red))}
+.tl-item{position:relative;margin-bottom:14px;background:#fff;border:1px solid var(--line);border-radius:12px;
+  padding:15px 18px;transition:transform .2s,box-shadow .2s}
+.tl-item:hover{transform:translateX(6px);box-shadow:0 10px 24px rgba(10,20,60,.12)}
+.tl-item::before{content:"";position:absolute;left:-29px;top:20px;width:12px;height:12px;border-radius:50%;
+  background:var(--gold);border:3px solid var(--blue)}
+.tl-item .yr{font-family:'Bricolage Grotesque',sans-serif;color:var(--red);font-weight:800;font-size:1.25rem}
+.tl-item h4{color:var(--blue-d);margin:2px 0 4px}
+.tl-item p{color:var(--mut);font-size:.9rem;line-height:1.55}
+.dept{background:#fff;border:1px solid var(--line);border-radius:12px;padding:15px 16px;transition:.2s}
+.dept:hover{transform:translateY(-4px);border-color:var(--blue);box-shadow:0 10px 22px rgba(0,32,159,.12)}
+.dept b{font-family:'Bricolage Grotesque',sans-serif;color:var(--blue-d);display:block}
+.dept span{font-size:.82rem;color:var(--mut)}
+.dept span::before{content:"📍 "}
+.info-strip{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0}
+.info-strip .si{border-bottom-color:var(--gold)}
+.fig{background:#fff;border:1px solid var(--line);border-top:4px solid var(--red);border-radius:12px;padding:16px;transition:.2s}
+.fig:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(10,20,60,.14)}
+.fig .dates{font-size:.72rem;letter-spacing:.1em;font-weight:700;color:var(--red);text-transform:uppercase}
+.fig b{font-family:'Bricolage Grotesque',sans-serif;color:var(--blue-d);font-size:1.05rem;display:block;margin:4px 0}
+.fig p{font-size:.87rem;color:var(--mut);line-height:1.5}
+
+/* ---------- CALCULATRICE ---------- */
+.calczone{display:grid;grid-template-columns:400px 1fr;gap:22px;align-items:start}
+@media(max-width:880px){.calczone{grid-template-columns:1fr}}
+.calc{background:#0d1b3d;border-radius:20px;padding:18px;box-shadow:0 24px 54px rgba(7,20,69,.4)}
+.calc-brand{display:flex;justify-content:space-between;color:#8fa3d9;font-size:.7rem;letter-spacing:.18em;font-weight:700;margin-bottom:10px}
+.calc-brand b{color:var(--gold);background:rgba(255,199,44,.12);border:1px solid rgba(255,199,44,.4);border-radius:6px;padding:2px 8px}
+.calc-screen{background:#cfe0a8;border-radius:12px;padding:14px 16px;text-align:right;min-height:86px;
+  box-shadow:inset 0 3px 10px rgba(0,0,0,.25);display:flex;flex-direction:column;justify-content:flex-end}
+#cExpr{font-family:'Bricolage Grotesque',sans-serif;font-size:1.5rem;font-weight:700;color:#1c2a12;word-break:break-all}
+#cRes{font-family:'Bricolage Grotesque',sans-serif;font-size:1.05rem;color:#4c6134;min-height:1.3em;word-break:break-all}
+.calc-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:14px}
+.ck{font-family:'Instrument Sans',sans-serif;font-weight:700;font-size:1.05rem;padding:14px 0;border-radius:10px;border:none;
+  background:#1c2f63;color:#fff;cursor:pointer;transition:background .15s,transform .12s}
+.ck:hover{background:#2a4388;transform:translateY(-1px)}
+.ck:active{transform:scale(.92)}
+.ck.fn{background:#142450;color:#9db4ef;font-size:.92rem}
+.ck.op{background:var(--gold-d);color:#081446;font-size:1.2rem}
+.ck.dgr{background:var(--red);color:#fff}
+.ck.eq{background:var(--red);color:#fff;font-size:1.25rem}
+.keys{list-style:none;display:grid;gap:8px}
+.keys li{font-size:.9rem;color:#3c4765;border-bottom:1px dashed var(--line);padding-bottom:7px}
+.keys b{font-family:'Bricolage Grotesque',sans-serif;color:var(--blue);background:var(--paper);border-radius:6px;padding:2px 8px;margin-right:4px}
+
+/* ---------- CAHIER D'APPEL ---------- */
+.appel-grid{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;align-items:start}
+@media(max-width:880px){.appel-grid{grid-template-columns:1fr}}
+.addrow{display:flex;gap:10px;margin-bottom:12px}
+.addrow input{flex:1;padding:12px 14px;border:2px solid var(--line);border-radius:12px;font-size:.95rem;font-family:inherit}
+.addrow input:focus{outline:none;border-color:var(--blue)}
+.actrow{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.cntrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.cntP,.cntA{border-radius:999px;padding:7px 16px;font-weight:700;font-size:.9rem}
+.cntP{background:#e2f4e9;color:#177245}.cntA{background:#fde5e9;color:var(--red)}
+.cntP b,.cntA b{font-family:'Bricolage Grotesque',sans-serif;font-size:1.15rem}
+.cntT{font-size:.8rem;color:var(--mut);font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.srow{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;
+  border:1px solid var(--line);margin-bottom:8px;background:#fff;transition:background .2s,border-color .2s}
+.srow.sp{background:#e9f7ee;border-color:#9fd8b4}
+.srow.sa{background:#fdeef1;border-color:#f0a8b5}
+.sname{font-weight:600;font-size:.95rem}
+.sbtns{display:flex;gap:6px}
+.sb{border:none;border-radius:8px;padding:7px 12px;font-size:.8rem;font-weight:700;cursor:pointer;transition:.15s;font-family:inherit}
+.sb.pb{background:#dff0e6;color:#177245}.srow.sp .sb.pb{background:#177245;color:#fff}
+.sb.ab{background:#fbe3e7;color:var(--red)}.srow.sa .sb.ab{background:var(--red);color:#fff}
+.sb.xb{background:#eef2fa;color:var(--mut)}.sb.xb:hover{background:var(--red);color:#fff}
+.sb:hover{transform:translateY(-1px)}
+.hitem{border:1px solid var(--line);border-radius:10px;padding:11px 14px;margin-bottom:8px;font-size:.9rem;background:var(--paper)}
+.hitem b{font-family:'Bricolage Grotesque',sans-serif;color:var(--blue-d);margin-right:8px}
+.hp{color:#177245;font-weight:700;margin-right:10px}.ha{color:var(--red);font-weight:700}
+.hitem small{display:block;color:var(--mut);margin-top:4px}
+.titem{display:flex;justify-content:space-between;padding:9px 12px;border-bottom:1px dashed var(--line);font-size:.92rem}
+.titem b{color:var(--red)}
+.empty{color:var(--mut);font-size:.88rem;font-style:italic}
+
+/* ---------- FAQ ---------- */
+.faq-cat h3{font-size:1.2rem;color:var(--blue-d);margin:26px 0 12px}
+.fq{background:#fff;border:1px solid var(--line);border-radius:12px;margin-bottom:10px;overflow:hidden;transition:box-shadow .2s}
+.fq:hover{box-shadow:0 8px 20px rgba(10,20,60,.10)}
+.fq>button{width:100%;text-align:left;padding:16px 18px;font-weight:700;font-size:.98rem;background:none;border:none;
+  cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:14px;font-family:'Instrument Sans',sans-serif;color:var(--ink)}
+.fq .arr{color:var(--red);font-weight:800;font-size:1.2rem;transition:transform .3s;flex:0 0 auto}
+.fq.open .arr{transform:rotate(45deg)}
+.fq.open{border-color:var(--blue)}
+.fa{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.fa p{padding:0 18px 16px;color:#3c4765;line-height:1.65;font-size:.93rem}
+
+/* ---------- PÉDAGOGIE ---------- */
+.prin{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:.2s}
+.prin:hover{transform:translateY(-4px);box-shadow:0 12px 26px rgba(10,20,60,.13)}
+.prin .n{font-family:'Bricolage Grotesque',sans-serif;font-size:2.6rem;font-weight:800;color:rgba(0,32,159,.12);position:absolute;top:6px;right:12px}
+.prin h4{color:var(--blue-d);margin-bottom:6px}
+.prin p{font-size:.88rem;color:var(--mut);line-height:1.55}
+.check{list-style:none;display:grid;gap:9px}
+.check li{background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px 42px;position:relative;font-size:.93rem;line-height:1.5}
+.check li::before{content:"✅";position:absolute;left:12px;top:11px}
+.tips{list-style:none;display:grid;gap:9px}
+.tips li{background:#fff;border-left:4px solid var(--gold);border-radius:0 10px 10px 0;padding:12px 16px;font-size:.92rem;line-height:1.55;box-shadow:0 4px 12px rgba(10,20,60,.06)}
+
+/* ---------- FOOTER ---------- */
+footer{background:var(--blue-d);color:#b9c6ef;text-align:center;padding:0 0 34px;margin-top:20px}
+footer .flagbar{margin-bottom:30px}
+.fbrand{font-size:1.7rem;font-weight:800;color:#fff}
+.fbrand span{color:var(--gold)}
+footer p{margin:8px 22px;font-size:.92rem}
+footer a{color:var(--gold);font-weight:700;text-decoration:none;border-bottom:2px solid rgba(255,199,44,.4)}
+.fprov{font-family:'Bricolage Grotesque',sans-serif;font-size:1.1rem;color:#fff;margin-top:16px!important}
+
+/* ---------- TOAST ---------- */
+#toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,80px);background:#177245;color:#fff;
+  padding:13px 26px;border-radius:999px;font-weight:700;box-shadow:0 14px 34px rgba(0,0,0,.3);
+  transition:transform .4s cubic-bezier(.2,.7,.3,1.2);z-index:80;font-size:.95rem}
+#toast.show{transform:translate(-50%,0)}
+
+@media(max-width:860px){
+  .hwrap{flex-direction:column;align-items:flex-start}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ ÉCRAN DE VERROUILLAGE (aucun code affiché) ══════════ -->
+<div id="lock">
+  <div class="lock-card">
+    <div class="lock-flag"></div>
+    <div class="lock-ico">🔒</div>
+    <p class="lock-motto">L'Union fait la Force ☆ 1804</p>
+    <h2>Contenu Verrouillé</h2>
+    <p class="lock-txt">L'accès aux fiches pédagogiques coûte <b>500 HTG / mois</b>.<br>
+      Un code = <b>30 jours</b> d'accès complet à toutes les matières, de la 7ᵉ à la NS4.</p>
+    <button class="btn red big" id="btnAct">🔓 ACTIVER L'ACCÈS (30 JOURS)</button>
+    <form id="codeForm" class="hide">
+      <input id="codeIn" type="text" autocomplete="off" placeholder="Votre code d'accès…">
+      <p class="err" id="codeErr"></p>
+      <div class="frow">
+        <button type="submit" class="btn blue">🔒 Déverrouiller</button>
+        <button type="button" class="btn ghost" id="btnCancel">Annuler</button>
+      </div>
+    </form>
+    <p class="lock-help">Pas de clé ? Contactez l'administrateur :<br>
+      <a href="https://wa.me/50931354041" target="_blank" rel="noopener">WhatsApp : +509 3135 4041</a></p>
+  </div>
+</div>
+
+<div id="page">
+<div id="app" class="hide">
+
+<div class="flagbar"></div>
+<header>
+  <div class="hwrap">
+    <div class="brand">
+      <div class="logo">📚</div>
+      <div>
+        <h1>PROF<span>Haiti</span></h1>
+        <p class="prem">PREMIUM<em>Support de Cours National · 7ᵉ AF → NS4 · 500 HTG / mois</em></p>
+      </div>
+    </div>
+    <div class="hchips">
+      <span class="chip-h" id="bac">🎓 Bac · J-…</span>
+      <span class="chip-h gold" id="subChip">🔒 …</span>
+    </div>
+  </div>
+  <p class="motto">L'Union fait la Force <b>☆</b> 1804</p>
+</header>
+
+<nav id="tabs">
+  <button class="tab act" data-t="accueil">🏠 Accueil</button>
+  <button class="tab" data-t="calc">📟 Calculatrice</button>
+  <button class="tab" data-t="appel">📝 Cahier d'Appel</button>
+  <button class="tab" data-t="maths">📐 Maths PRO</button>
+  <button class="tab" data-t="phys">⚛️ Physique PRO</button>
+  <button class="tab" data-t="langues">🗣️ Langues PRO</button>
+  <button class="tab" data-t="lit">📚 Littérature PRO</button>
+  <button class="tab" data-t="soc">🌍 Sciences Sociales</button>
+  <button class="tab" data-t="svt">🧬 SVT / Biologie</button>
+  <button class="tab" data-t="ped">🎓 Pédagogie</button>
+  <button class="tab" data-t="faq">❓ FAQ</button>
+</nav>
+
+<main>
+
+<!-- ══════════ ACCUEIL ══════════ -->
+<section class="sec on" id="sec-accueil">
+  <div class="wrap">
+    <p class="bonjou disp">Bonjou, Pwofesè ! <span>👋</span></p>
+    <p class="lead">📚 Toutes les fiches sont disponibles de la 7ᵉ AF à la NS4, pendant 30 jours par code.</p>
+
+    <div class="prov rv">
+      <div>
+        <span class="prov-tag">↻ Pwovèb ayisyen · proverbe du jour</span>
+        <p class="prov-kr" id="provKr"></p>
+        <p class="prov-fr" id="provFr"></p>
+      </div>
+      <button id="provBtn" title="Un autre proverbe">↻</button>
+    </div>
+
+    <div class="subpanel rv">
+      <span class="tag">🎟️ Mon abonnement</span>
+      <div class="stats">
+        <div class="stat hot"><b id="stDays">–</b><span>jours restants</span></div>
+        <div class="stat"><b class="cnt" data-n="9">0</b><span>modules complets</span></div>
+        <div class="stat"><b class="cnt" data-n="48">0</b><span>formules &amp; règles avec exemples</span></div>
+        <div class="stat"><b class="cnt" data-n="13">0</b><span>grandes dates d'Haïti</span></div>
+        <div class="stat"><b class="cnt" data-n="20">0</b><span>départements + auteurs du Bac</span></div>
+      </div>
+    </div>
+
+    <h3 class="blk">⚡ Accès rapide aux modules</h3>
+    <div class="grid">
+      <div class="mod rv s-maths" onclick="go('maths')"><span class="ico">📐</span><h3>Mathématiques PRO</h3><p>Algèbre 9ᵉ AF, analyse NS3-NS4 (limites, dérivées, intégrales, complexes), géométrie &amp; trigo SOH CAH TOA. Chaque formule avec un exemple.</p><span class="go">Ouvrir →</span></div>
+      <div class="mod rv s-phys" onclick="go('phys')"><span class="ico">⚛️</span><h3>Physique &amp; Chimie PRO</h3><p>Mécanique (Newton, énergies), électricité (Ohm, puissance), optique (Snell-Descartes) + chimie (mole, pH) et unités SI.</p><span class="go">Ouvrir →</span></div>
+      <div class="mod rv s-lang" onclick="go('langues')"><span class="ico">🗣️</span><h3>Anglais &amp; Espagnol</h3><p>Present Perfect, essay writing, subjuntivo, vocabulaire du Bac.</p><span class="go">Ouvrir →</span></div>
+      <div class="mod rv s-lit" onclick="go('lit')"><span class="ico">📚</span><h3>Littérature PRO</h3><p>De Boisrond Tonnerre à Frankétienne + mouvements français.</p><span class="go">Ouvrir →</span></div>
+      <div class="mod rv s-soc" onclick="go('soc')"><span class="ico">🌍</span><h3>Sciences Sociales</h3><p>13 dates d'Haïti, 10 départements, économie, symboles.</p><span class="go">Ouvrir →</span></div>
+    </div>
+
+    <h3 class="blk">🧰 Zouti · inclus dans l'abonnement</h3>
+    <div class="grid mods two">
+      <div class="mod rv s-ped" onclick="go('calc')"><span class="ico">📟</span><h3>Calculatrice Scientifique</h3><p>Trigonométrie en degrés, log, ln, √, π, puissances… incluse dans l'abonnement, utilisable au tableau comme en classe.</p><span class="go">Ouvrir →</span></div>
+      <div class="mod rv s-svt" onclick="go('appel')"><span class="ico">📝</span><h3>Cahier d'Appel Numérique</h3><p>Faites l'appel en 30 secondes : présent / absent en un clic, historique automatique et détection des grands absents. Sauvegardé sur l'appareil.</p><span class="go">Ouvrir →</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CALCULATRICE ══════════ -->
+<section class="sec" id="sec-calc">
+  <div class="wrap">
+    <p class="kick">Zouti · inclus dans l'abonnement</p>
+    <h2>📟 Calculatrice Scientifique</h2>
+    <p class="sub">Trigonométrie en degrés, comme au lycée haïtien. Fonctionne aussi au clavier (chiffres, + − × / ^ ( ) , Entrée = égal, Échap = effacer).</p>
+    <div class="calczone">
+      <div class="calc rv">
+        <div class="calc-brand"><span>PROF HAITI&nbsp;&nbsp;FX-991</span><b>DEG</b></div>
+        <div class="calc-screen"><div id="cExpr">0</div><div id="cRes"></div></div>
+        <div class="calc-grid" id="cGrid"></div>
+      </div>
+      <div>
+        <div class="panel rv">
+          <h4>🔑 Aide-mémoire des touches</h4>
+          <ul class="keys">
+            <li><b>sin cos tan</b> — en degrés (sin 30 = 0,5)</li>
+            <li><b>log</b> — base 10</li>
+            <li><b>ln</b> — base e</li>
+            <li><b>√(</b> — racine carrée</li>
+            <li><b>π</b> — 3,14159…</li>
+            <li><b>x²</b> — carré</li>
+            <li><b>xʸ</b> — puissance (2^10)</li>
+            <li><b>%</b> — divise par 100</li>
+          </ul>
+        </div>
+        <div class="panel tip rv">
+          <h4>💡 Astuce pour la classe</h4>
+          <p>Projetez la calculatrice au tableau pour corriger les exercices collectivement.</p>
+          <p>Le résultat s'affiche en direct pendant la frappe : idéal pour faire deviner l'ordre de grandeur avant de valider.</p>
+          <p>Les parenthèses se ferment toutes seules si vous oubliez : plus d'erreur de syntaxe.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CAHIER D'APPEL ══════════ -->
+<section class="sec" id="sec-appel">
+  <div class="wrap">
+    <p class="kick">Kaye apèl · vie de classe</p>
+    <h2>📝 Cahier d'Appel Numérique</h2>
+    <p class="sub">Un clic par élève, un bouton pour enregistrer : l'historique se construit tout seul et reste sauvegardé sur cet appareil.</p>
+    <div class="appel-grid">
+      <div class="panel rv">
+        <div class="addrow">
+          <input id="newStud" placeholder="Nom du nouvel élève…">
+          <button class="btn blue" id="addBtn">＋ Ajouter</button>
+        </div>
+        <div class="actrow">
+          <button class="btn green" id="allP">✅ Tout prezan</button>
+          <button class="btn red" id="saveCall">💾 Anrejistre</button>
+        </div>
+        <div class="cntrow">
+          <span class="cntT">📋 Jodi a · aujourd'hui</span>
+          <span class="cntP">Prezan <b id="cP">0</b></span>
+          <span class="cntA">Absan <b id="cA">0</b></span>
+        </div>
+        <div id="studList"></div>
+      </div>
+      <div>
+        <div class="panel rv"><h4>🗂️ Historique des appels</h4><div id="histList"></div></div>
+        <div class="panel warn rv"><h4>🚨 Élèves les plus absents</h4><div id="topAbs"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ MATHS ══════════ -->
+<section class="sec" id="sec-maths">
+  <div class="wrap">
+    <p class="kick">Matematik · fiches de révision</p>
+    <h2>📐 Mathématiques PRO</h2>
+    <p class="sub">Survolez (ou touchez) une carte bleue pour voir un exemple résolu. Programme 9ᵉ AF → NS4.</p>
+    <div id="mathA"></div>
+    <h3 class="grp">🧩 Systèmes d'équations — méthode de substitution</h3>
+    <ol class="steps rv">
+      <li><b>Isoler</b> — Dans la première équation, isoler une inconnue (ex. y = 5 − x).</li>
+      <li><b>Remplacer</b> — Remplacer cette expression dans la deuxième équation : on obtient une équation à une inconnue.</li>
+      <li><b>Résoudre</b> — Résoudre pour trouver x, puis reporter pour trouver y.</li>
+      <li><b>Vérifier</b> — Vérifier le couple (x ; y) dans les deux équations de départ.</li>
+    </ol>
+    <div id="mathB"></div>
+    <div class="sets rv"><b>ℕ</b> entiers naturels &nbsp;·&nbsp; <b>ℤ</b> entiers relatifs &nbsp;·&nbsp; <b>ℚ</b> rationnels &nbsp;·&nbsp; <b>ℝ</b> réels &nbsp;&nbsp;—&nbsp;&nbsp; ℕ ⊂ ℤ ⊂ ℚ ⊂ ℝ</div>
+  </div>
+</section>
+
+<!-- ══════════ PHYSIQUE ══════════ -->
+<section class="sec" id="sec-phys">
+  <div class="wrap">
+    <p class="kick">Fizik &amp; chimi · fiches de révision</p>
+    <h2>⚛️ Physique &amp; Chimie PRO</h2>
+    <p class="sub">Formules du Bac (NS3-NS4) avec exemples chiffrés et unités SI. Touchez une carte pour voir l'exemple.</p>
+    <div id="physCards"></div>
+    <h3 class="grp">Unités SI à connaître</h3>
+    <div class="si-strip rv" id="siStrip"></div>
+  </div>
+</section>
+
+<!-- ══════════ LANGUES ══════════ -->
+<section class="sec" id="sec-langues">
+  <div class="wrap">
+    <p class="kick">English &amp; Español · niveau Bac</p>
+    <h2>🗣️ Anglais &amp; Espagnol PRO</h2>
+    <p class="sub">La grammaire qui tombe au Bac, le vocabulaire essentiel et la méthode de l'essay.</p>
+
+    <h3 class="grp">🇬🇧 English — Present Perfect vs Past Simple</h3>
+    <div class="tblwrap rv"><table class="tbl"><thead><tr><th></th><th>Present Perfect</th><th>Past Simple</th></tr></thead><tbody>
+      <tr><td><b>Formation</b></td><td>have / has + participe passé</td><td>verbe au prétérit (-ed ou irrégulier)</td></tr>
+      <tr><td><b>Emploi</b></td><td>lien avec le présent, bilan, expérience</td><td>action terminée, datée</td></tr>
+      <tr><td><b>Mots-clés</b></td><td>since, for, already, yet, just, ever, never</td><td>yesterday, last week, ago, in 2010</td></tr>
+      <tr><td><b>Exemple</b></td><td>She <b>has lived</b> here since 2020.</td><td>She <b>lived</b> there in 2020.</td></tr>
+    </tbody></table></div>
+
+    <div class="two-col">
+      <div class="panel rv">
+        <h4>✍️ How to write an essay (Bac)</h4>
+        <ol class="steps">
+          <li><b>Introduction</b> — hook (accroche) + présentation du sujet + annonce du plan.</li>
+          <li><b>Body</b> — 2-3 paragraphes = 1 idée + 1 argument + 1 exemple chacun.</li>
+          <li><b>Conclusion</b> — résumé des idées + ouverture (question ou perspective).</li>
+        </ol>
+        <p style="margin-top:12px"><b>Linking words :</b> However — cependant · Moreover — de plus · Therefore — donc · On the other hand — d'un autre côté · To conclude — pour conclure</p>
+      </div>
+      <div class="panel rv">
+        <h4>📖 Vocabulary for the exam</h4>
+        <div class="chips">
+          <span class="vchip"><b>school</b> — école</span><span class="vchip"><b>teacher</b> — professeur</span>
+          <span class="vchip"><b>textbook</b> — manuel</span><span class="vchip"><b>exam</b> — examen</span>
+          <span class="vchip"><b>computer</b> — ordinateur</span><span class="vchip"><b>network</b> — réseau</span>
+          <span class="vchip"><b>download</b> — télécharger</span><span class="vchip"><b>screen</b> — écran</span>
+          <span class="vchip"><b>pollution</b> — pollution</span><span class="vchip"><b>recycling</b> — recyclage</span>
+          <span class="vchip"><b>drought</b> — sécheresse</span><span class="vchip"><b>flood</b> — inondation</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="grp">🇪🇸 Español — Presente de Subjuntivo</h3>
+    <div class="tblwrap rv"><table class="tbl"><thead><tr><th>Persona</th><th>hablar (-ar)</th><th>comer (-er)</th><th>vivir (-ir)</th></tr></thead><tbody>
+      <tr><td>yo</td><td>hable</td><td>coma</td><td>viva</td></tr>
+      <tr><td>tú</td><td>hables</td><td>comas</td><td>vivas</td></tr>
+      <tr><td>él / ella</td><td>hable</td><td>coma</td><td>viva</td></tr>
+      <tr><td>nosotros</td><td>hablemos</td><td>comamos</td><td>vivamos</td></tr>
+      <tr><td>vosotros</td><td>habléis</td><td>comáis</td><td>viváis</td></tr>
+      <tr><td>ellos</td><td>hablen</td><td>coman</td><td>vivan</td></tr>
+    </tbody></table></div>
+    <div class="two-col">
+      <div class="panel rv">
+        <h4>¿Cuándo se usa? (quand l'employer ?)</h4>
+        <p><b>Deseo :</b> Quiero que tú estudies más.</p>
+        <p><b>Emoción :</b> Me alegra que estés aquí.</p>
+        <p><b>Duda :</b> Dudo que venga mañana.</p>
+        <p><b>Obligación :</b> Es necesario que practiquemos cada día.</p>
+      </div>
+      <div class="panel rv">
+        <h4>🌎 El Caribe hispanohablante</h4>
+        <p><b>Cuba</b> — La Habana · <b>República Dominicana</b> — Santo Domingo · <b>Puerto Rico</b> — San Juan</p>
+        <div class="chips" style="margin-top:10px">
+          <span class="vchip"><b>la escuela</b> — école</span><span class="vchip"><b>el maestro</b> — maître</span>
+          <span class="vchip"><b>aprender</b> — apprendre</span><span class="vchip"><b>la tarea</b> — devoir</span>
+          <span class="vchip"><b>el examen</b> — examen</span>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="grp">🔄 Irregular Verbs — Top 25 for the Bac</h3>
+    <div class="tblwrap rv" id="verbsTbl"></div>
+
+    <h3 class="grp">⏰ Other key tenses — quick guide</h3>
+    <div class="tblwrap rv" id="tensesTbl"></div>
+
+    <div class="panel rv">
+      <h4>💬 Functional language for the classroom</h4>
+      <div class="chips">
+        <span class="vchip">Can you repeat, please? — Pouvez-vous répéter ?</span>
+        <span class="vchip">How do you spell…? — Comment on écrit… ?</span>
+        <span class="vchip">What does … mean? — Qu'est-ce que … veut dire ?</span>
+        <span class="vchip">May I go out? — Puis-je sortir ?</span>
+        <span class="vchip">I don't understand. — Je ne comprends pas.</span>
+        <span class="vchip">Well done! — Bravo !</span>
+        <span class="vchip">Open your books page 12. — Ouvrez vos livres page 12.</span>
+        <span class="vchip">Listen and repeat. — Écoutez et répétez.</span>
+      </div>
+    </div>
+
+    <h3 class="grp">🇪🇸 Pretérito Indefinido vs Imperfecto</h3>
+    <div class="tblwrap rv"><table class="tbl"><thead><tr><th></th><th>Indefinido</th><th>Imperfecto</th></tr></thead><tbody>
+      <tr><td><b>Emploi</b></td><td>action ponctuelle, datée</td><td>habitude, description, action en cours</td></tr>
+      <tr><td><b>Mots-clés</b></td><td>ayer, anoche, en 2010, de repente</td><td>siempre, todos los días, mientras, a menudo</td></tr>
+      <tr><td><b>-ar</b></td><td>hablé, hablaste, habló…</td><td>hablaba, hablabas, hablaba…</td></tr>
+      <tr><td><b>-er / -ir</b></td><td>comí, viví…</td><td>comía, vivía…</td></tr>
+      <tr><td><b>Exemple</b></td><td>Ayer <b>fui</b> al mercado.</td><td>Cuando era niña, <b>jugaba</b> al fútbol.</td></tr>
+    </tbody></table></div>
+
+    <div class="two-col">
+      <div class="panel rv">
+        <h4>🌎 América Latina — capitales</h4>
+        <div class="chips">
+          <span class="vchip"><b>México</b> — Ciudad de México</span><span class="vchip"><b>Colombia</b> — Bogotá</span>
+          <span class="vchip"><b>Venezuela</b> — Caracas</span><span class="vchip"><b>Perú</b> — Lima</span>
+          <span class="vchip"><b>Argentina</b> — Buenos Aires</span><span class="vchip"><b>Chile</b> — Santiago</span>
+          <span class="vchip"><b>Bolivia</b> — Sucre / La Paz</span><span class="vchip"><b>Ecuador</b> — Quito</span>
+          <span class="vchip"><b>Paraguay</b> — Asunción</span><span class="vchip"><b>Uruguay</b> — Montevideo</span>
+        </div>
+      </div>
+      <div class="panel rv">
+        <h4>✍️ Vocabulario útil — redacción</h4>
+        <div class="chips">
+          <span class="vchip">en primer lugar — tout d'abord</span><span class="vchip">además — de plus</span>
+          <span class="vchip">sin embargo — cependant</span><span class="vchip">por lo tanto — par conséquent</span>
+          <span class="vchip">por otro lado — d'un autre côté</span><span class="vchip">en conclusión — en conclusion</span>
+          <span class="vchip">a mi parecer — à mon avis</span><span class="vchip">en resumen — en résumé</span>
+        </div>
+      </div>
+    </div>
+    <div class="note rv">💡 Pour la classe : « Practice makes perfect » ↔ « La práctica hace al maestro » ↔ « Se pratik ki fè metrès » 😉</div>
+  </div>
+</section>
+
+<!-- ══════════ LITTÉRATURE ══════════ -->
+<section class="sec" id="sec-lit">
+  <div class="wrap">
+    <p class="kick">Literati · clé du Bac</p>
+    <h2>📚 Littérature Haïtienne &amp; Française</h2>
+    <p class="sub">Le tableau des mouvements haïtiens à connaître pour le Bac, enrichi des œuvres clés, + les grands mouvements français.</p>
+
+    <h3 class="grp">🇭🇹 Littérature haïtienne</h3>
+    <div class="tblwrap rv"><table class="tbl"><thead><tr><th>Période</th><th>Mouvement</th><th>Auteurs phares</th><th>Œuvres clés</th></tr></thead><tbody>
+      <tr><td>1804–1836</td><td><b>Pionniers</b></td><td>Boisrond Tonnerre</td><td>Mémoires pour servir à l'histoire d'Haïti</td></tr>
+      <tr><td>1836–1860</td><td><b>Romantisme</b></td><td>Oswald Durand, Coriolan Ardouin</td><td>Choucoune (poème national)</td></tr>
+      <tr><td>1927–1945</td><td><b>Indigénisme</b></td><td>Jacques Roumain, Jean Price-Mars</td><td>Gouverneurs de la Rosée (1944) · Ainsi parla l'oncle (1928)</td></tr>
+      <tr><td>1945–1980</td><td><b>Modernité</b></td><td>René Depestre, Marie Vieux-Chauvet</td><td>Amour, Colère, Folie (1968)</td></tr>
+      <tr><td>1975 → auj.</td><td><b>Spiralisme</b></td><td>Frankétienne</td><td>Dezafi (1975) · Mûr à crever</td></tr>
+      <tr><td>Contemporain</td><td><b>Aujourd'hui</b></td><td>Dany Laferrière, Lyonel Trouillot</td><td>L'Énigme du retour (Prix Médicis 2009)</td></tr>
+    </tbody></table></div>
+    <div class="note rv">🇭🇹 <b>Le saviez-vous ?</b> <i>Dezafi</i> (1975) de Frankétienne est le premier roman écrit en créole haïtien. Et l'Indigénisme de Roumain dialogue avec la Négritude de Césaire et Senghor.</div>
+
+    <h3 class="grp">🇫🇷 Littérature française — les mouvements du Bac</h3>
+    <div class="grid">
+      <div class="mv rv"><span class="mv-e">🏛️</span><h4>Classicisme <small>(XVIIᵉ)</small></h4><p>Molière : <i>L'Avare</i> (1668), <i>Le Tartuffe</i>, <i>Le Malade imaginaire</i>. Règle des trois unités ; « plaire et instruire ».</p></div>
+      <div class="mv rv"><span class="mv-e">💡</span><h4>Lumières <small>(XVIIIᵉ)</small></h4><p>Voltaire : <i>Candide</i> (1759) · Rousseau : <i>Du contrat social</i> · Montesquieu : <i>Lettres persanes</i>.</p></div>
+      <div class="mv rv"><span class="mv-e">🌊</span><h4>Romantisme <small>(XIXᵉ)</small></h4><p>Victor Hugo : <i>Notre-Dame de Paris</i> (1831), <i>Les Misérables</i> (1862). Le « je », la nature, la liberté.</p></div>
+      <div class="mv rv"><span class="mv-e">🔍</span><h4>Réalisme <small>(XIXᵉ)</small></h4><p>Balzac : <i>Le Père Goriot</i> (1835), <i>La Comédie humaine</i> · Flaubert : <i>Madame Bovary</i> (1857).</p></div>
+      <div class="mv rv"><span class="mv-e">🌀</span><h4>Surréalisme &amp; Négritude <small>(XXᵉ)</small></h4><p>Breton : <i>Manifeste du surréalisme</i> (1924) · Césaire : <i>Cahier d'un retour au pays natal</i> (1939).</p></div>
+    </div>
+
+    <h3 class="grp">🎯 Figures de style — méthode du Bac</h3>
+    <div class="tblwrap rv"><table class="tbl"><thead><tr><th>Figure</th><th>Définition</th><th>Exemple</th></tr></thead><tbody>
+      <tr><td><b>Métaphore</b></td><td>comparaison sans mot-outil</td><td>Cet homme est un lion.</td></tr>
+      <tr><td><b>Comparaison</b></td><td>comparaison avec comme / tel / pareil à</td><td>Il est fort comme un bœuf.</td></tr>
+      <tr><td><b>Personnification</b></td><td>attribuer des traits humains à un objet/animal</td><td>Le vent murmure dans les arbres.</td></tr>
+      <tr><td><b>Allitération</b></td><td>répétition de consonnes</td><td>Pour qui <b>s</b>ont ces <b>s</b>erpents qui <b>s</b>iffent sur vos têtes ?</td></tr>
+      <tr><td><b>Assonance</b></td><td>répétition de voyelles</td><td>Tout m'afflige et me nuit et conspire à me nuire.</td></tr>
+      <tr><td><b>Hyperbole</b></td><td>exagération</td><td>Je meurs de faim.</td></tr>
+      <tr><td><b>Litote</b></td><td>dire moins pour exprimer plus</td><td>Va, je ne te hais point. <i>(Le Cid)</i></td></tr>
+      <tr><td><b>Antithèse</b></td><td>opposition de deux termes</td><td>Cet obscur clarté qui tombe des étoiles.</td></tr>
+      <tr><td><b>Anaphore</b></td><td>répétition en tête de phrase</td><td>Je vous écris… Je vous écris encore…</td></tr>
+      <tr><td><b>Oxymore</b></td><td>deux termes contradictoires réunis</td><td>Cette obscure clarté.</td></tr>
+    </tbody></table></div>
+
+    <h3 class="grp">📝 Méthode du commentaire composé — étapes en 4 temps</h3>
+    <ol class="steps rv">
+      <li><b>Lecture analytique</b> — lire 3 fois le texte, surligner procédés, champs lexicaux, figures de style.</li>
+      <li><b>Problématique</b> — formuler une question qui rende compte de l'enjeu du texte (ex. « Comment le poète exprime-t-il la nostalgie ? »).</li>
+      <li><b>Plan en 2 ou 3 parties</b> — chaque partie = une grande idée, subdivisée en 2-3 sous-parties avec citations.</li>
+      <li><b>Rédaction</b> — introduction (auteur, œuvre, contexte, problématique, plan) → développement → conclusion (bilan + ouverture).</li>
+    </ol>
+
+    <h3 class="grp">💎 Citations clés à connaître</h3>
+    <div class="quotes">
+      <div class="quote rv"><p>L'union fait la force.</p><span>Devise nationale d'Haïti, gravée sur les armoiries</span></div>
+      <div class="quote rv"><p>Celui qui plante un arbre plante l'espoir.</p><span>Jacques Roumain, Gouverneurs de la Rosée (1944)</span></div>
+      <div class="quote rv"><p>Seul l'égalitarisme réciproque des deux langues peut fonder une véritable politique linguistique en Haïti.</p><span>Jean Price-Mars, Ainsi parla l'oncle (1928)</span></div>
+      <div class="quote rv"><p>Je suis tendresse, écume, mer, oraliture, je suis poésie comestible.</p><span>Frankétienne</span></div>
+      <div class="quote rv"><p>Le malheur d'être aimé par quelqu'un qu'on n'aime pas.</p><span>Marie Vieux-Chauvet, Amour, Colère, Folie (1968)</span></div>
+    </div>
+
+    <h3 class="grp">📚 Genres littéraires — repères</h3>
+    <div class="grid">
+      <div class="mv rv"><span class="mv-e">🎭</span><h4>Le théâtre</h4><p>Tragédie, comédie, drame. Structure : exposition, nœud, péripéties, dénouement. Au Bac : Molière, Hugo, Beaumarchais.</p></div>
+      <div class="mv rv"><span class="mv-e">📖</span><h4>Le roman</h4><p>Balzac et le réalisme ; Zola et le naturalisme ; Proust et l'autofiction. Le roman haïtien : Roumain, Vieux-Chauvet, Laferrière.</p></div>
+      <div class="mv rv"><span class="mv-e">✒️</span><h4>La poésie</h4><p>Slave ancien, vers libre moderne. Césaire et la Négritude, Oswald Durand en Haïti (« Choucoune »).</p></div>
+      <div class="mv rv"><span class="mv-e">📰</span><h4>L'essai</h4><p>Texte argumenté : Montaigne (inventeur), Voltaire, Rousseau. En Haïti : Price-Mars, Depestre.</p></div>
+      <div class="mv rv"><span class="mv-e">📜</span><h4>Le conte</h4><p>Récit court, souvent oral. Tradition haïtienne : Bouki et Malice, Ti Malice. À l'origine des contes d'Afrique de l'Ouest.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SCIENCES SOCIALES ══════════ -->
+<section class="sec" id="sec-soc">
+  <div class="wrap">
+    <p class="kick">Istwa &amp; jewografi · sciences sociales</p>
+    <h2>🌍 Sciences Sociales &amp; Histoire d'Haïti</h2>
+    <p class="sub">Les grandes dates de la nation, les 10 départements, l'économie et les symboles — tout pour préparer vos cours d'histoire-géo.</p>
+
+    <h3 class="grp">📜 Histoire d'Haïti — les grandes dates</h3>
+    <div class="tl" id="tlBox"></div>
+
+    <h3 class="grp">🗺️ Les 10 départements d'Haïti</h3>
+    <div class="grid rv" id="deptBox"></div>
+    <div class="info-strip rv">
+      <span class="si"><b>Superficie</b> 27 750 km²</span><span class="si"><b>Population</b> ≈ 11,7 millions</span>
+      <span class="si"><b>Langues</b> kreyòl &amp; français</span><span class="si"><b>Capitale</b> Port-au-Prince</span>
+      <span class="si"><b>Point culminant</b> Morne de la Selle (2 680 m)</span><span class="si"><b>Monnaie</b> gourde (HTG)</span>
+    </div>
+
+    <h3 class="grp">💼 Économie &amp; richesses</h3>
+    <div class="grid">
+      <div class="mv rv s-soc"><span class="mv-e">🌱</span><h4>Agriculture</h4><p>Café (Thiotte), mangue Francisque, cacao, riz de l'Artibonite. Haïti est l'un des premiers exportateurs mondiaux de vétiver.</p></div>
+      <div class="mv rv s-soc"><span class="mv-e">✈️</span><h4>Diaspora</h4><p>Les transferts de la diaspora représentent environ 20 à 25 % du PIB (plus de 3 milliards de dollars par an).</p></div>
+      <div class="mv rv s-soc"><span class="mv-e">🏭</span><h4>Industrie &amp; artisanat</h4><p>Assemblage textile (CODEVI), fer découpé de Croix-des-Bouquets, rhum Barbancourt.</p></div>
+      <div class="mv rv s-soc"><span class="mv-e">🏝️</span><h4>Tourisme</h4><p>Citadelle Laferrière et palais Sans-Souci (UNESCO, 1982), Labadie, Jacmel, Île-à-Vache.</p></div>
+    </div>
+
+    <h3 class="grp">🇭🇹 Symboles nationaux</h3>
+    <div class="grid">
+      <div class="mv rv"><span class="mv-e">🚩</span><h4>Le drapeau</h4><p>Bleu et rouge, créé le 18 mai 1803 à l'Arcahaie. Devise : « L'Union fait la Force ».</p></div>
+      <div class="mv rv"><span class="mv-e">🎵</span><h4>L'hymne national</h4><p>La Dessalinienne — paroles de Justin Lhérisson (1903), musique de Nicolas Geffrard.</p></div>
+      <div class="mv rv"><span class="mv-e">🛡️</span><h4>Les armoiries</h4><p>Palmier, bonnet phrygien, canons et trophées — la liberté conquise par les armes.</p></div>
+    </div>
+
+    <h3 class="grp">🏛️ Grands personnages de l'histoire d'Haïti</h3>
+    <div class="grid" id="figBox"></div>
+
+    <h3 class="grp">📜 Constitution du 29 mars 1987 — articles clés</h3>
+    <div class="tblwrap rv" id="constTbl"></div>
+
+    <h3 class="grp">🏞️ Géographie physique</h3>
+    <div class="grid">
+      <div class="mv rv s-soc"><span class="mv-e">⛰️</span><h4>Montagnes</h4><p>Morne de la Selle (2 680 m), Morne La Hotte (2 347 m), Pic Macaya, Massif du Nord (Pico Duarte côté dominicain).</p></div>
+      <div class="mv rv s-soc"><span class="mv-e">🌊</span><h4>Fleuves &amp; rivières</h4><p>Rivière de l'Artibonite (la plus longue, 240 km), Rivière Grise, Rivière Les Cayes, Fleuve Massacre (frontière dominicaine).</p></div>
+      <div class="mv rv s-soc"><span class="mv-e">🏝️</span><h4>Îles</h4><p>Île de la Tortue (Tortuga), Île-à-Vache, Île de la Gonâve, Les Cayemites.</p></div>
+      <div class="mv rv s-soc"><span class="mv-e">🌤️</span><h4>Climat</h4><p>Tropical humide, 2 saisons : saison sèche (nov.-mars) et saison des pluies (avril-oct.). Cyclones fréquents (juin-novembre).</p></div>
+    </div>
+
+    <h3 class="grp">🎭 Culture &amp; traditions haïtiennes</h3>
+    <div class="grid">
+      <div class="mv rv"><span class="mv-e">🎵</span><h4>Musique</h4><p>Compas direct (Nemours Jean-Baptiste, Tabou Combo), twoubadou, rara (musique de Pâques), mizik rasin (Boukman Eksperyans).</p></div>
+      <div class="mv rv"><span class="mv-e">🎨</span><h4>Arts plastiques</h4><p>Peinture naïve (Hector Hyppolite, Préfète Duffaut), fer découpé de Croix-des-Bouquets (Georges Liautaud), tapisserie (Saint-Soleil).</p></div>
+      <div class="mv rv"><span class="mv-e">🍽️</span><h4>Cuisine</h4><p>Griot, riz national (diri ak pwa), legim, soup joumou (1ᵉʳ janvier — symbole d'indépendance), akra, tassot.</p></div>
+      <div class="mv rv"><span class="mv-e">🎊</span><h4>Fêtes &amp; traditions</h4><p>18 mai (drapeau), 1ᵉʳ janvier (indépendance + soup joumou), Kanaval (février), Fèt Gede (2 novembre), Noël.</p></div>
+      <div class="mv rv"><span class="mv-e">🛐</span><h4>Croyances</h4><p>Catholicisme et protestantisme, vaudou (reconnu religion d'État en 2003). Syncrétisme profond — loa, veve, chants.</p></div>
+      <div class="mv rv"><span class="mv-e">⚽</span><h4>Sports</h4><p>Football, basket-ball. Sélection nationale : les « Grenadiers ». Haïti a participé à la Coupe du Monde 1974 (Allemagne).</p></div>
+    </div>
+
+    <h3 class="grp">📊 Quelques chiffres-clés</h3>
+    <div class="tblwrap rv"><table class="tbl"><thead><tr><th>Indicateur</th><th>Valeur</th><th>Remarque</th></tr></thead><tbody>
+      <tr><td>Superficie</td><td><b>27 750 km²</b></td><td>Partie occidentale de l'île d'Hispaniola</td></tr>
+      <tr><td>Population</td><td><b>≈ 11,7 millions</b></td><td>+ ~3 millions dans la diaspora</td></tr>
+      <tr><td>Espérance de vie</td><td><b>≈ 64 ans</b></td><td>Homme : 62 ; Femme : 67</td></tr>
+      <tr><td>Taux d'alphabétisation</td><td><b>≈ 62 %</b></td><td>Objectif du gouvernement : 90 %</td></tr>
+      <tr><td>PIB nominal</td><td><b>≈ 20 milliards USD</b></td><td>Transferts diaspora ≈ 25 % du PIB</td></tr>
+      <tr><td>Langues</td><td><b>Kreyòl (100 %) &amp; français</b></td><td>Article 5 de la Constitution</td></tr>
+      <tr><td>Monnaie</td><td><b>Gourde (HTG)</b></td><td>Indexée historiquement sur le dollar US</td></tr>
+    </tbody></table></div>
+
+    <h3 class="grp">🤝 Citoyenneté &amp; droits de l'enfant</h3>
+    <div class="grid">
+      <div class="mv rv"><span class="mv-e">📖</span><h4>Droit à l'éducation</h4><p>Convention internationale des droits de l'enfant (1989), art. 28 : tout enfant a droit à l'éducation primaire gratuite et obligatoire.</p></div>
+      <div class="mv rv"><span class="mv-e">🛡️</span><h4>Protection contre la violence</h4><p>Loi du 3 juin 2003 interdisant les châtiments corporels en milieu scolaire en Haïti. Le prof ne frappe pas — il accompagne.</p></div>
+      <div class="mv rv"><span class="mv-e">⚖️</span><h4>Égalité filles-garçons</h4><p>Article 17 de la Constitution : égalité devant la loi, sans distinction de sexe. Encourager les filles vers les filières scientifiques.</p></div>
+      <div class="mv rv"><span class="mv-e">🌱</span><h4>Éducation à l'environnement</h4><p>Reboisement, gestion des déchets, économie d'eau — la politique nationale 2010-2030 met l'accent sur l'éducation environnementale.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ SVT ══════════ -->
+<section class="sec" id="sec-svt">
+  <div class="wrap">
+    <p class="kick">Syans natirèl · fiches de révision</p>
+    <h2>🧬 SVT — Sciences de la Vie et de la Terre</h2>
+    <p class="sub">Touchez une carte verte pour voir l'exemple chiffré ou l'illustration. Programme 7ᵉ AF → NS4.</p>
+    <div id="svtA"></div>
+
+    <h3 class="grp">🫀 Le corps humain — systèmes</h3>
+    <div class="grid">
+      <div class="mv rv s-svt"><span class="mv-e">🫁</span><h4>Respiratoire</h4><p>Fosses nasales → trachée → bronches → alvéoles. Échanges O₂/CO₂ par diffusion. Adulte : 12-20 respirations/min.</p></div>
+      <div class="mv rv s-svt"><span class="mv-e">❤️</span><h4>Circulatoire</h4><p>Cœur (4 cavités), artères, veines, capillaires. Sang = plasma + globules rouges (O₂) + blancs (défense) + plaquettes (coagulation).</p></div>
+      <div class="mv rv s-svt"><span class="mv-e">🍽️</span><h4>Digestif</h4><p>Bouche → œsophage → estomac → intestin grêle (absorption) → gros intestin. Foie = bile, pancréas = enzymes.</p></div>
+      <div class="mv rv s-svt"><span class="mv-e">🧠</span><h4>Nerveux</h4><p>Cerveau, moelle épinière, nerfs. Neurone = dendrites + corps cellulaire + axone. Vitesse de l'influx : ≈ 120 m/s.</p></div>
+      <div class="mv rv s-svt"><span class="mv-e">🦴</span><h4>Osseux</h4><p>206 os chez l'adulte (300 chez le bébé). Calcium, phosphore, collagène. Moelle osseuse = production des cellules sanguines.</p></div>
+      <div class="mv rv s-svt"><span class="mv-e">💧</span><h4>Urinaire</h4><p>2 reins, 2 uretères, vessie, urètre. Néphron = unité fonctionnelle. Filtre 180 L de sang/jour → 1,5 L d'urine.</p></div>
+    </div>
+
+    <div id="svtB"></div>
+
+    <h3 class="grp">🦠 Santé &amp; maladies courantes</h3>
+    <div class="grid">
+      <div class="mv rv s-svt"><span class="mv-e">🦟</span><h4>Paludisme</h4><p>Parasite Plasmodium transmis par l'anophèle. Symptômes : fièvre, frissons. Prévention : moustiquaire imprégnée.</p></div>
+      <div class="mv rv s-svt"><span class="mv-e">💧</span><h4>Choléra</h4><p>Bactérie Vibrio cholerae dans l'eau souillée. Diarrhée sévère. Prévention : eau potable, lavage des mains.</p></div>
+      <div class="mv rv s-svt"><span class="mv-e">🦷</span><h4>Carie dentaire</h4><p>Bactéries transformant le sucre en acide. Brossage 2×/jour, fluor, moins de sucre.</p></div>
+      <div class="mv rv s-svt"><span class="mv-e">💉</span><h4>Vaccination</h4><p>BCG, rougeole, polio, tétanos, hépatite B. Calendrier vaccinal haïtien : 0-11 mois pour la primovaccination.</p></div>
+      <div class="mv rv s-svt"><span class="mv-e">🍎</span><h4>Nutrition équilibrée</h4><p>3 groupes : énergétiques (céréales), bâtisseurs (protéines), protecteurs (fruits/légumes). 5 portions de fruits/légumes par jour.</p></div>
+      <div class="mv rv s-svt"><span class="mv-e">🧠</span><h4>Santé mentale</h4><p>Sommeil 7-9 h, activité physique 30 min/jour, gestion du stress. Chez l'enfant : écoute, jeu, sécurité affective.</p></div>
+    </div>
+    <div class="note rv">🌱 « Anpil ti pwent k ap fè yon gwo pyebwa » — Beaucoup de petites racines font un grand arbre. Chaque geste compte pour la planète 🌍</div>
+  </div>
+</section>
+
+<!-- ══════════ PÉDAGOGIE ══════════ -->
+<section class="sec" id="sec-ped">
+  <div class="wrap">
+    <p class="kick">Pedagoji · conseils pratiques</p>
+    <h2>🎓 Pédagogie &amp; Gestion de classe</h2>
+    <p class="sub">Des méthodes concrètes, testées en classe haïtienne, pour enseigner efficacement de la 7ᵉ AF à la NS4.</p>
+
+    <h3 class="grp">🧭 Les 7 grands principes pédagogiques</h3>
+    <div class="grid">
+      <div class="prin rv"><span class="n">1</span><h4>Clarté de l'objectif</h4><p>Annoncer en début d'heure : « À la fin de cette séance, vous saurez calculer une vitesse moyenne ». L'élève sait où il va.</p></div>
+      <div class="prin rv"><span class="n">2</span><h4>Activation des prérequis</h4><p>Toujours commencer par un rappel (5 min max) : « Qui me dit ce qu'on a vu hier ? » Cela facilite l'ancrage mémoriel.</p></div>
+      <div class="prin rv"><span class="n">3</span><h4>Différenciation</h4><p>Tous les élèves n'apprennent pas pareil. Varier les supports : visuel (schéma), auditif (explication), kinesthésique (manipulation).</p></div>
+      <div class="prin rv"><span class="n">4</span><h4>Évaluation formative</h4><p>Évaluer pour apprendre, pas seulement pour noter. Mini-quiz, question à main levée, sortie de classe (« ticket de sortie »).</p></div>
+      <div class="prin rv"><span class="n">5</span><h4>Feedback constructif</h4><p>« Tu as bien identifié les données, mais tu as oublié de convertir les km en m. Refais l'étape 3. » Précis, encourageant, actionnable.</p></div>
+      <div class="prin rv"><span class="n">6</span><h4>Engagement actif</h4><p>L'élève doit faire, pas seulement écouter. 70 % de temps actif pour 30 % de temps magistral. Travail en binômes, défis, jeux de rôle.</p></div>
+      <div class="prin rv"><span class="n">7</span><h4>Boucle métacognitive</h4><p>Faire réfléchir l'élève sur sa propre démarche : « Comment as-tu trouvé cette réponse ? Qu'est-ce qui t'a aidé ? »</p></div>
+    </div>
+
+    <h3 class="grp">📋 Planifier une séance en 6 étapes</h3>
+    <ol class="steps rv">
+      <li><b>Rappel (5 min)</b> — Prérequis utile pour la séance du jour. Question rapide au tableau, mini-quiz oral, vidéo de 2 min.</li>
+      <li><b>Accroche (5 min)</b> — Question déclencheuse, image mystère, situation-problème. Susciter la curiosité : « Pourquoi le riz flotte-t-il dans la soup joumou ? »</li>
+      <li><b>Découverte (15 min)</b> — Présentation du nouveau contenu : explication, démonstration, document à analyser. Alterner 5 min d'écoute / 5 min d'activité.</li>
+      <li><b>Mise en pratique (15 min)</b> — Exercices encadrés, travail en binômes. Le prof circule, corrige individuellement, identifie les difficultés communes.</li>
+      <li><b>Synthèse (5 min)</b> — Retour au tableau : carte mentale, mots-clés, formule à retenir. L'élève note le résumé dans son cahier.</li>
+      <li><b>Évaluation finale (5 min)</b> — Ticket de sortie : une question, une réponse à rendre en sortant. Permet de mesurer l'atteinte de l'objectif.</li>
+    </ol>
+
+    <h3 class="grp">🚦 Gestion de classe — anticiper les problèmes</h3>
+    <div class="tblwrap rv"><table class="tbl"><thead><tr><th>Situation</th><th>À éviter</th><th>À privilégier</th></tr></thead><tbody>
+      <tr><td><b>Bavardages</b></td><td>Crier, punir collectivement</td><td>S'approcher de l'élève, baisser la voix, questionner nominativement</td></tr>
+      <tr><td><b>Élève qui dort</b></td><td>Réveiller brutalement</td><td>Confier une petite tâche, demander ce qui ne va pas après le cours</td></tr>
+      <tr><td><b>Refus de travailler</b></td><td>Exclusion immédiate</td><td>Dialoguer en aparté, identifier la cause (faim, problème familial…)</td></tr>
+      <tr><td><b>Triche en contrôle</b></td><td>Humilier publiquement</td><td>Annuler la copie, revoir la règle en classe, organisation spatiale préventive</td></tr>
+      <tr><td><b>Question hors sujet</b></td><td>Ignorer ou couper</td><td>« Bonne question, on y reviendra à la fin / c'est pour la semaine prochaine »</td></tr>
+      <tr><td><b>Bruit montant</b></td><td>Taper sur la table</td><td>Compter 3 secondes en silence, lever la main (effet miroir)</td></tr>
+    </tbody></table></div>
+
+    <div class="two-col">
+      <div class="panel rv">
+        <h4>✅ Checklist d'une bonne séance</h4>
+        <ul class="check">
+          <li>J'ai préparé mon support écrit (cahier de texte actualisé).</li>
+          <li>J'ai testé le matériel (projecteur, craie, calculatrice, fiches).</li>
+          <li>L'objectif est écrit au tableau en début d'heure.</li>
+          <li>J'ai prévu au moins une activité élève (pas seulement magistral).</li>
+          <li>J'ai prévu un exercice différencié pour les plus rapides.</li>
+          <li>J'ai un plan B si l'électricité coupe ou si le groupe est agité.</li>
+          <li>Je termine par un résumé oral ou écrit au tableau.</li>
+          <li>J'ai noté qui a compris / qui n'a pas compris pour la prochaine fois.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="panel rv">
+          <h4>🎯 Évaluer sans pénaliser — la grille critériée</h4>
+          <div class="tblwrap"><table class="tbl"><thead><tr><th>Critère</th><th>Points</th><th>Indicateur</th></tr></thead><tbody>
+            <tr><td>Compréhension de l'énoncé</td><td><b>2</b></td><td>Données identifiées, question reformulée</td></tr>
+            <tr><td>Choix de la méthode</td><td><b>3</b></td><td>Bonne formule / bonne démarche annoncée</td></tr>
+            <tr><td>Calculs</td><td><b>3</b></td><td>Opérations correctes, unités respectées</td></tr>
+            <tr><td>Rédaction de la réponse</td><td><b>1</b></td><td>Phrase complète, unité finale</td></tr>
+            <tr><td>Vérification</td><td><b>1</b></td><td>Ordre de grandeur cohérent</td></tr>
+          </tbody></table></div>
+        </div>
+        <div class="panel tip rv">
+          <h4>💡 Astuce — la note « constructive »</h4>
+          <p>Encadrer en vert ce qui est juste, en rouge ce qui est faux.</p>
+          <p>Toujours écrire un commentaire orienté action : « Refais le calcul de l'étape 3 » plutôt que « Faux ».</p>
+          <p>Donner une seconde chance pour les erreurs d'inattention (rendre une copie corrigée améliorée).</p>
+          <p>Valoriser les progrès, pas seulement la performance finale.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 class="grp">🤝 Travailler avec les parents</h3>
+    <div class="grid">
+      <div class="mv rv s-ped"><span class="mv-e">📞</span><h4>Communication régulière</h4><p>Cahier de liaison, réunions trimestrielles, numéros WhatsApp en cas d'urgence. Prévenir avant de punir.</p></div>
+      <div class="mv rv s-ped"><span class="mv-e">🤲</span><h4>Accueil bienveillant</h4><p>Toujours commencer une rencontre parent par un point positif sur l'enfant. Le parent est un allié, pas un adversaire.</p></div>
+      <div class="mv rv s-ped"><span class="mv-e">📚</span><h4>Soutien aux devoirs</h4><p>Donner une fiche méthode aux parents : comment aider sans faire à la place. Insister sur lecture + sommeil.</p></div>
+      <div class="mv rv s-ped"><span class="mv-e">🙏</span><h4>Respect des rythmes</h4><p>Tenir compte du calendrier agricole (récolte), des fêtes religieuses, des conditions de transport. Flexibilité = confiance.</p></div>
+    </div>
+
+    <h3 class="grp">⚡ Astuces pour les classes à effectif chargé</h3>
+    <ul class="tips rv">
+      <li>Numéroter les élèves et faire l'appel visuel en silence (gain de 5 min).</li>
+      <li>Utiliser des ardoises individuelles ou des mini-tableaux pour réponse simultanée de toute la classe.</li>
+      <li>Désigner un « chef de rang » responsable du matériel et du silence pendant la transition.</li>
+      <li>Travail en binômes fixes (un fort + un moins à l'aise), changés chaque mois.</li>
+      <li>Découper la séance en blocs de 10-15 min pour maintenir l'attention.</li>
+      <li>Préparer 5 exercices « challenge » dans une pochette pour les élèves rapides.</li>
+      <li>Avoir une banque de mini-jeux prêts à lancer : domino des formules, bingo des verbes…</li>
+      <li>Projeter un minuteur au tableau pour rythmer les activités (effet « game show »).</li>
+    </ul>
+    <div class="note rv">🌟 « Yon bon pwofesè se yon pye bwa ki bay lonbraj » — Un bon professeur est un arbre qui donne de l'ombre. Merci pour votre travail, chers collègues !</div>
+  </div>
+</section>
+
+<!-- ══════════ FAQ (format de code retiré) ══════════ -->
+<section class="sec" id="sec-faq">
+  <div class="wrap">
+    <p class="kick">Kesyon yo poze souvan</p>
+    <h2>❓ Foire Aux Questions</h2>
+    <p class="sub">Tout ce que vous voulez savoir sur PROFHaiti Premium, l'abonnement, le fonctionnement et la pédagogie.</p>
+    <div id="faqBox"></div>
+    <div class="note rv">📩 Toujours une question ? Écrivez à <b>WhatsApp +509 3135 4041</b> — nous répondons à tous les professeurs, abonnés ou non. « Pa gen pwoblèm san solisyon » 🌟</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="flagbar"></div>
+  <p class="fbrand disp">PROF Haiti <span>Premium</span></p>
+  <p>Fèt ak fyète pou pwofesè ayisyen yo 🇭🇹 · 500 HTG / mois · 7ᵉ AF → NS4</p>
+  <p>Kontak administratè : <a href="https://wa.me/50931354041" target="_blank" rel="noopener">WhatsApp +509 3135 4041</a></p>
+  <p class="fprov">« Men anpil, chay pa lou. »</p>
+</footer>
+
+</div><!-- /app -->
+</div><!-- /page -->
+
+<div id="toast"></div>
+
+<script>
+/* ═══════════ DONNÉES ═══════════ */
+const PROVERBS=[
+ ["Men anpil, chay pa lou.","Plusieurs mains rendent la charge légère."],
+ ["Dèyè mòn, gen mòn.","Derrière les montagnes, il y a d'autres montagnes."],
+ ["Piti piti, zwazo fè nich li.","Petit à petit, l'oiseau fait son nid."],
+ ["Se pratik ki fè metrès.","C'est la pratique qui rend maître."],
+ ["Anpil ti pwent k ap fè yon gwo pyebwa.","Beaucoup de petites racines font un grand arbre."],
+ ["Yon bon pwofesè se yon pye bwa ki bay lonbraj.","Un bon professeur est un arbre qui donne de l'ombre."],
+ ["Pa gen pwoblèm san solisyon.","Il n'y a pas de problème sans solution."],
+ ["Kouto pa koupe manch li.","Le couteau ne coupe pas son propre manche."],
+ ["Dlo pa janm bliye chemen li.","L'eau n'oublie jamais son chemin."],
+ ["Bèf san mèt, kabrit manje l.","Un bœuf sans maître, les chèvres le dévorent."]
+];
+
+const M_ALG={"9ᵉ AF — Algèbre":[
+ ["Identité 1","(a+b)² = a² + 2ab + b²","Exemple : (x+3)² = x² + 6x + 9"],
+ ["Identité 2","(a−b)² = a² − 2ab + b²","Exemple : (x−4)² = x² − 8x + 16"],
+ ["Identité 3","(a+b)(a−b) = a² − b²","Exemple : (x+5)(x−5) = x² − 25"],
+ ["Factorisation","ka + kb = k(a + b)","Exemple : 6x² + 9x = 3x(2x + 3)"],
+ ["Équation 1ᵉʳ degré","ax + b = 0 → x = −b/a","Exemple : 3x − 9 = 0 → 3x = 9 → x = 3"]]};
+const M_ANA={"NS3 – NS4 — Analyse (Bac)":[
+ ["Limites usuelles","lim 1/x = 0 (x→+∞)","À retenir : lim xⁿ = +∞ (x→+∞) ; lim eˣ = 0 (x→−∞)."],
+ ["Continuité","lim f(x) = f(a) (x→a)","En mots : la courbe se trace sans lever le crayon au point a."],
+ ["Dérivée de xⁿ","(xⁿ)′ = n·xⁿ⁻¹","Exemple : (x³)′ = 3x² ; (x²+5x)′ = 2x+5"],
+ ["Produit","(u·v)′ = u′v + uv′","Exemple : (x·eˣ)′ = eˣ + x·eˣ = (1+x)eˣ"],
+ ["Quotient","(u/v)′ = (u′v − uv′)/v²","Exemple : (1/x)′ = (0·x − 1·1)/x² = −1/x²"],
+ ["Primitive","∫xⁿdx = xⁿ⁺¹/(n+1) + C","Exemple : ∫x² dx = x³/3 + C (n ≠ −1)"],
+ ["Nombres complexes","z = a + bi, i² = −1","Module : |z| = √(a²+b²) · Conjugué : z̄ = a − bi · Ex. : |3+4i| = 5"]]};
+const M_GEO={"Géométrie & Trigonométrie":[
+ ["Pythagore","a² + b² = c²","Exemple : 3² + 4² = 9 + 16 = 25 → c = 5"],
+ ["Thalès","AM/AB = AN/AC = MN/BC","Condition : droites (MN) et (BC) parallèles."],
+ ["Trigonométrie","SOH · CAH · TOA","sin = Opposé/Hypoténuse · cos = Adjacent/Hypoténuse · tan = Opposé/Adjacent · Ex. : sin 30° = 1/2"],
+ ["Aires","Disque : A = πr²","Triangle : ½ × b × h · Trapèze : (B+b) × h / 2"]]};
+
+const PHYS={"Mécanique (NS3 / NS4)":[
+ ["Vitesse moyenne","V = d / t","Exemple : 100 m en 20 s → V = 5 m/s = 18 km/h (× 3,6)"],
+ ["2ᵉ loi de Newton","F = m × a","Exemple : 2 kg × 3 m/s² = 6 N (newtons)"],
+ ["Énergie cinétique","Ec = ½ m v²","Exemple : ½ × 1000 kg × (20 m/s)² = 200 000 J"],
+ ["Énergie potentielle","Ep = m × g × h","g ≈ 9,8 m/s² en Haïti. Ex. : 5 kg × 9,8 × 2 m = 98 J"],
+ ["Travail d'une force","W = F × d","Exemple : 50 N sur 4 m → W = 200 J"]],
+"Électricité":[
+ ["Loi d'Ohm","U = R × I","Exemple : 10 Ω × 2 A = 20 V"],
+ ["Puissance","P = U × I","Exemple : 220 V × 5 A = 1 100 W"],
+ ["Énergie","E = P × t","Exemple : 1 kW × 3 h = 3 kWh"],
+ ["Résistances","Série : R = R₁+R₂","Parallèle : 1/R = 1/R₁ + 1/R₂"]],
+"Optique & Chimie":[
+ ["Snell-Descartes","n₁·sin i = n₂·sin r","Indices : air n=1 ; eau n=1,33 ; verre ≈ 1,5."],
+ ["Miroirs & lentilles","Concave ↔ convergent","Miroir convexe = divergent. Lentille convergente → image réelle renversée."],
+ ["Quantité de matière","n = m / M","Exemple : 18 g d'eau / 18 g·mol⁻¹ = 1 mol"],
+ ["Avogadro","N = n × Nₐ","Nₐ = 6,022 × 10²³ mol⁻¹ — 1 mol d'eau = 6,022×10²³ molécules."],
+ ["Échelle pH","0 — 7 — 14","pH < 7 acide (citron ≈ 2) · pH = 7 neutre (eau) · pH > 7 basique (savon ≈ 10)"]]};
+const SI=[["mètre","m"],["kilogramme","kg"],["seconde","s"],["ampère","A"],["kelvin","K"],["mole","mol"],["newton","N"],["joule","J"],["watt","W"],["volt","V"],["ohm","Ω"]];
+
+const S_A={"🔬 La cellule — base du vivant":[
+ ["Cellule animale","Membrane + cytoplasme + noyau","Pas de paroi, pas de chloroplastes. Ex. : neurone, hématie, cellule musculaire."],
+ ["Cellule végétale","+ paroi + chloroplastes + vacuole","Autotrophe : fait sa propre matière organique par photosynthèse."],
+ ["Organites","Mitochondries = usines d'énergie","Réticulum : synthèse des protéines. Appareil de Golgi : conditionnement. Noyau : abrite l'ADN."],
+ ["ADN","Double hélice, A-T / G-C","4 bases : Adénine-Thymine, Guanine-Cytosine. 1 m déroulé par cellule humaine, 3 milliards de paires."]],
+"🌱 Photosynthèse & Respiration":[
+ ["Photosynthèse","6 CO₂ + 6 H₂O → C₆H₁₂O₆ + 6 O₂","Lumière + chlorophylle. Se déroule dans les chloroplastes. Produit glucose + oxygène."],
+ ["Respiration cellulaire","C₆H₁₂O₆ + 6 O₂ → 6 CO₂ + 6 H₂O + ATP","Dans les mitochondries. Produit 36-38 ATP par glucose (énergie cellulaire)."],
+ ["ATP","Adénosine triphosphate","« Monnaie énergétique » de la cellule. Hydrolyse : ATP → ADP + Pi + 30,5 kJ/mol."],
+ ["Échanges gazeux","Stomates (feuilles) / poumons","Plantes : entrée CO₂ / sortie O₂ le jour (photosynthèse > respiration)."]],
+"🧬 Génétique & Reproduction":[
+ ["Mitose","1 cellule → 2 cellules identiques","Croissance, réparation. 46 chromosomes chez l'humain (23 paires)."],
+ ["Méiose","1 cellule → 4 gamètes (n chromosomes)","Reproduction sexuée. Brassage génétique = diversité. Spermatozoïdes (23) + ovule (23) = 46."],
+ ["Lois de Mendel","Allèles dominants / récessifs","Croisement : Aa × Aa → 25 % AA, 50 % Aa, 25 % aa. Phénotype : si A dominant, 75 % expriment A."],
+ ["Génotype vs Phénotype","Génotype = gènes / Phénotype = aspect","Génotype Aa, phénotype [A] si A dominant. L'environnement influence aussi le phénotype."],
+ ["Sexe de l'enfant","XX (fille) / XY (garçon)","C'est le spermatozoïde qui détermine le sexe : X ou Y. L'ovule est toujours X."]]};
+const S_B={"🌲 Écologie & environnement":[
+ ["Chaîne alimentaire","Producteur → 1er consommateur → …","Exemple : Herbe → Lapin → Renard → Aigle. À chaque maillon : 90 % de l'énergie est perdue."],
+ ["Pyramide écologique","Base large = producteurs","Loi des 10 % : à chaque niveau, seulement 10 % de la biomasse est transférée au niveau supérieur."],
+ ["Cycle de l'eau","Évaporation → condensation → précipitations","Sources : océans (97 %), glaces (2 %), eaux douces (1 %). Haïti : pluies 1000-3000 mm/an selon les zones."],
+ ["Cycle du carbone","CO₂ ↔ photosynthèse ↔ respiration","Combustibles fossiles = carbone stocké depuis des millions d'années. Leur combustion libère le CO₂ → effet de serre."],
+ ["Biodiversité","3 niveaux : écosystèmes / espèces / gènes","Haïti : hotspot de biodiversité (île des Caraïbes). 5 espèces endémiques de mammifères menacées."]]};
+
+const TIMELINE=[
+ ["1492","Arrivée de Christophe Colomb","5 décembre : Colomb aborde l'île au Môle Saint-Nicolas. Les Taïnos l'appellent Bohio / Ayiti."],
+ ["1697","Traité de Ryswick","L'Espagne cède la partie occidentale de l'île à la France : naissance de Saint-Domingue."],
+ ["1791","Cérémonie du Bois-Caïman","14 août : Boukman Dutty déclenche la révolte des esclaves dans la plaine du Nord."],
+ ["1793","Abolition de l'esclavage","29 août : le commissaire Sonthonax proclame l'abolition à Saint-Domingue."],
+ ["1801","Constitution de Toussaint","Toussaint Louverture promulgue une constitution et devient gouverneur général à vie."],
+ ["1803","Bataille de Vertières","18 novembre : l'armée indigène de Dessalines vainc les troupes de Rochambeau."],
+ ["1804","Indépendance d'Haïti 🇭🇹","1ᵉʳ janvier, aux Gonaïves : Dessalines proclame l'indépendance. Première république noire du monde."],
+ ["1806","Assassinat de Dessalines","17 octobre au Pont-Rouge. L'empire se divise entre Christophe et Pétion."],
+ ["1825","Ordonnance de Charles X","La France « reconnaît » l'indépendance contre 150 millions de francs-or, qui écrase l'économie."],
+ ["1915–1934","Occupation américaine","Résistance de Charlemagne Péralte dans les mornes ; départ des Marines en 1934."],
+ ["1957–1986","Ère Duvalier","François « Papa Doc » puis Jean-Claude « Bébé Doc », jusqu'à la chute du 7 février 1986."],
+ ["1987","Constitution du 29 mars","Article 5 : « La langue créole est la langue qui unit tous les Haïtiens. »"],
+ ["2010","Séisme du 12 janvier","Magnitude 7,0 : plus de 200 000 morts. « Dèyè mòn, gen mòn » — le courage continue."]
+];
+const DEPTS=[["Artibonite","Gonaïves"],["Centre","Hinche"],["Grand'Anse","Jérémie"],["Nippes","Miragoâne"],["Nord","Cap-Haïtien"],["Nord-Est","Fort-Liberté"],["Nord-Ouest","Port-de-Paix"],["Ouest","Port-au-Prince"],["Sud","Les Cayes"],["Sud-Est","Jacmel"]];
+const FIGURES=[
+ ["≈ 1743 — 1803","Toussaint Louverture","Gouverneur général, stratège diplomate. Surnommé le « Spartacus noir ». Mort au fort de Joux (France)."],
+ ["1758 — 1806","Jean-Jacques Dessalines","Libérateur, fondateur de l'indépendance (1ᵉʳ janvier 1804). Empereur Jacques Iᵉʳ. Assassiné au Pont-Rouge."],
+ ["1770 — 1818","Alexandre Pétion","Président de la République du Sud (1807-1818). Soutint Bolívar et la libération de l'Amérique latine."],
+ ["1771 — 1820","Henri Christophe","Roi Henri Iᵉʳ au Nord. Bâtit la Citadelle Laferrière et le palais Sans-Souci (UNESCO)."],
+ ["1876 — 1922","Charlemagne Péralte","Cacos, héros de la résistance à l'occupation américaine (1915-1934). Tué en 1919."],
+ ["1876 — 1969","Jean Price-Mars","Médecin, diplomate, père de l'indigénisme. Ainsi parla l'oncle (1928) réhabilite la culture paysanne."],
+ ["1907 — 1944","Jacques Roumain","Écrivain, communiste, fondateur du Parti communiste haïtien. Auteur de Gouverneurs de la Rosée."],
+ ["1936 — 2017","René Depestre","Poète, diplomate, essayiste. Prix Renaudot 2002 pour Hadriana dans tous mes rêves."]
+];
+const CONST=[
+ ["Art. 5","« Toutes les Haïtiens sont unis par une langue commune : le kreyòl. » Le créole et le français sont langues officielles."],
+ ["Art. 7","« La devise de la nation est : L'Union fait la Force. »"],
+ ["Art. 8","L'emblème national est le drapeau bleu et rouge (créé le 18 mai 1803 à l'Arcahaie)."],
+ ["Art. 12","La République d'Haïti est indivisible, souveraine, démocratique."],
+ ["Art. 32","L'éducation est un droit fondamental. La scolarité obligatoire gratuite est de 9 ans."],
+ ["Art. 137","Le Président de la République est élu pour 5 ans au suffrage universel direct."],
+ ["Art. 150","Nul ne peut exercer le pouvoir constitutionnel plus de deux mandats consécutifs."]
+];
+const VERBS=[["be","was / were","been","être"],["have","had","had","avoir"],["do","did","done","faire"],["go","went","gone","aller"],["see","saw","seen","voir"],["give","gave","given","donner"],["take","took","taken","prendre"],["come","came","come","venir"],["get","got","got / gotten","obtenir"],["make","made","made","faire / fabriquer"],["know","knew","known","savoir / connaître"],["think","thought","thought","penser"],["say","said","said","dire"],["tell","told","told","raconter"],["leave","left","left","partir / laisser"],["feel","felt","felt","ressentir"],["bring","brought","brought","apporter"],["begin","began","begun","commencer"],["keep","kept","kept","garder"],["hold","held","held","tenir"],["write","wrote","written","écrire"],["stand","stood","stood","se tenir debout"],["hear","heard","heard","entendre"],["let","let","let","laisser / permettre"],["read","read","read","lire (prononcé « red »)"]];
+const TENSES=[["Past Continuous","was/were + V-ing","She was reading when he came."],["Present Perfect Continuous","have/has been + V-ing","I have been studying for 2 hours."],["Future Simple","will + V","I will help you tomorrow."],["Future Continuous","will be + V-ing","This time tomorrow, I will be flying."],["Conditional","would + V","I would travel if I had money."],["Modals","can, could, must, should, may…","You should revise every day."]];
+
+/* FAQ — le format et l'exemple de code ont été RETIRÉS (sécurité) */
+const FAQ=[
+["🎟️ Abonnement & codes d'accès",[
+ ["Combien coûte l'abonnement à PROFHaiti Premium ?","L'abonnement coûte 500 HTG par mois, soit environ 5 dollars US. Chaque code d'accès donne 30 jours complets d'accès à toutes les fiches pédagogiques, toutes matières confondues, de la 7ᵉ AF à la NS4. Le paiement se fait auprès de l'administrateur via WhatsApp."],
+ ["Comment obtenir un code d'accès ?","Contactez l'administrateur sur WhatsApp au +509 3135 4041. Après confirmation du paiement (500 HTG), vous recevez votre code d'accès personnel. Saisissez ce code dans l'écran de verrouillage pour activer vos 30 jours."],
+ ["Un code peut-il être utilisé sur plusieurs appareils ?","Non. Chaque code est lié à un appareil dès sa première activation. Cette mesure vise à protéger le travail des auteurs et à pérenniser le service. Pour un second appareil (ordinateur de l'école + téléphone personnel), un second code est nécessaire — des tarifs groupés existent pour les écoles."],
+ ["Que se passe-t-il à l'expiration ?","L'écran de verrouillage réapparaît automatiquement. Vos données (cahier d'appel, élèves, historique) restent sauvegardées sur votre appareil : il vous suffira de renouveler avec un nouveau code pour les retrouver telles quelles. Aucune donnée n'est perdue."],
+ ["Existe-t-il un accès administrateur ?","Oui. Les directeurs d'école et inspecteurs peuvent demander un code administrateur spécial qui offre un accès illimité sur l'appareil, sans date d'expiration. Contactez l'administrateur pour les modalités."]]],
+["📚 Contenu pédagogique",[
+ ["Quelles classes sont couvertes ?","PROFHaiti Premium couvre toute la scolarité secondaire haïtienne : 7ᵉ, 8ᵉ, 9ᵉ AF (cycles fondamentaux) et NS1, NS2, NS3, NS4 (secondaire). Les fiches sont étiquetées par niveau. La calculatrice scientifique et le cahier d'appel sont utilisables à tous les niveaux."],
+ ["Toutes les matières sont-elles incluses ?","Sont incluses : Mathématiques, Physique-Chimie, Sciences de la Vie et de la Terre (SVT), Anglais, Espagnol, Littérature haïtienne et française, Sciences Sociales (Histoire-Géo-Éducation civique), plus un module Pédagogie pour vous aider à enseigner. La calculatrice scientifique et le cahier d'appel numérique complètent l'offre."],
+ ["Le contenu suit-il le programme officiel haïtien ?","Oui. Toutes les fiches sont alignées sur le Programme National de Formation (PNF) du Ministère de l'Éducation Nationale. Les chapitres, objectifs et compétences attendues sont identiques. Les exemples sont ancrés dans la réalité haïtienne (gourdes, villes, histoire nationale)."],
+ ["Les fiches sont-elles en français ou en créole ?","Les fiches sont en français (langue d'enseignement officielle), avec des encarts en créole haïtien pour les proverbes, mots-clés culturels et conseils pédagogiques. Cette approche bilingue respecte l'article 5 de la Constitution et aide à ancrer les notions dans la réalité quotidienne."],
+ ["Le contenu est-il mis à jour ?","Oui. Chaque trimestre, de nouvelles fiches sont ajoutées, les exemples chiffrés sont réactualisés (taux de change, données démographiques) et les retours des professeurs utilisateurs sont intégrés. Vous recevez automatiquement la dernière version quand vous ouvrez l'application en ligne."]]],
+["💻 Technique & appareils",[
+ ["Quels appareils sont compatibles ?","PROFHaiti Premium fonctionne sur tout appareil équipé d'un navigateur web moderne : ordinateur Windows/Mac/Linux, tablette Android/iPad, smartphone. Aucune installation nécessaire — l'application s'ouvre dans le navigateur. Pour un usage hors-ligne, vous pouvez télécharger la page HTML complète."],
+ ["Faut-il une connexion Internet permanente ?","Non. Une fois la page chargée, l'application fonctionne hors-ligne. Vous avez besoin d'Internet uniquement pour : (1) ouvrir l'application la première fois, (2) la mettre à jour. Toutes les données (cahier d'appel, élèves, historique, code d'activation) sont stockées localement sur votre appareil."],
+ ["Mes données sont-elles protégées ?","Oui. Toutes vos données (liste d'élèves, historique d'appel, code d'abonnement) sont stockées uniquement dans le localStorage de votre navigateur, sur votre propre appareil. Aucune donnée n'est envoyée vers un serveur."],
+ ["Puis-je projeter l'application en classe ?","Bien sûr ! PROFHaiti Premium est conçu pour la projection : affichage optimisé 16:9, calculatrice visible au tableau, fiches en grand format, typographie lisible à 5 mètres. Idéal avec un vidéoprojecteur, un écran TV ou un TBI. Une fonction « mode présentation » (plein écran) est disponible via F11 dans la plupart des navigateurs."],
+ ["L'application fonctionne-t-elle sur un vieux téléphone ?","Oui. PROFHaiti Premium est volontairement légère (aucune image lourde, pas de framework JS). Elle tourne même sur un smartphone Android 6 avec 1 Go de RAM. La version mobile s'adapte automatiquement (onglets scrollables, cartes empilées verticalement)."]]],
+["🎓 Pédagogie & utilisation",[
+ ["Comment intégrer les fiches dans mon cours ?","Trois moments possibles : (1) au début comme accroche (projeter la carte d'une formule et demander « que veut dire cette écriture ? »), (2) pendant comme support visuel à votre explication, (3) à la fin comme fiche de synthèse projetée pendant que les élèves recopient. Les cartes retournables (flip) permettent aussi des jeux de devinettes."],
+ ["Les élèves peuvent-ils utiliser l'application ?","Oui, mais l'application est pensée pour les professeurs. Pour les élèves, nous recommandons : (1) projection collective en classe, (2) impression des fiches pour distribution, (3) utilisation de la calculatrice au tableau. Si vous souhaitez une version élève (sans cahier d'appel, sans verrouillage), contactez l'administrateur."],
+ ["Le cahier d'appel est-il conforme aux exigences du Ministère ?","Le cahier d'appel numérique de PROFHaiti Premium est un outil complémentaire de suivi. Il ne remplace pas le registre officiel papier exigé par le Ministère. En revanche, il vous permet de gagner du temps sur l'appel quotidien, de suivre les absences sur la durée et de cibler les élèves à risque. Un export PDF imprimable est en cours de développement pour faciliter la double saisie."],
+ ["Puis-je ajouter mes propres élèves au cahier d'appel ?","Oui. Par défaut, une liste d'exemple est fournie (12 élèves fictifs). Vous pouvez : (1) supprimer les élèves d'exemple avec le bouton ✕, (2) ajouter vos propres élèves via le champ « Nom du nouvel élève… », (3) saisir plusieurs classes. Toutes les données restent locales à votre appareil."],
+ ["La calculatrice respecte-t-elle les conventions haïtiennes ?","Oui. La calculatrice travaille en degrés par défaut (et non en radians), ce qui correspond aux conventions du lycée haïtien. Les résultats utilisent la virgule décimale (et non le point) conformément à l'usage francophone. Les fonctions trigonométriques (sin, cos, tan) sont paramétrées pour les degrés."]]],
+["🤝 Support & communauté",[
+ ["Comment contacter le support ?","Par WhatsApp uniquement au +509 3135 4041. Délai de réponse : 24 h ouvrées (lundi-samedi, 8 h-18 h). Pour les urgences techniques (application bloquée, code non reconnu), indiquez « URGENT » en début de message. Pour les suggestions pédagogiques, écrivez « SUGGESTION » — toutes les idées sont étudiées."],
+ ["Puis-je suggérer de nouvelles fiches ?","Oui, et nous vous encourageons à le faire ! Envoyez par WhatsApp : (1) la matière et le niveau, (2) le sujet précis, (3) si possible un exemple. Votre nom sera crédité dans la fiche si elle est publiée. Une communauté de professeurs contributeurs se constitue progressivement — rejoignez-la !"],
+ ["Y a-t-il une formation pour bien utiliser l'application ?","Oui. Des sessions de formation en ligne (1 h) sont organisées chaque début de trimestre pour les nouveaux abonnés. Inscription via WhatsApp. Les anciens abonnés peuvent s'inscrire aux sessions avancées : pédagogie active, évaluation par compétences, gestion de classe différenciée."],
+ ["Que faire si je perds mon téléphone ?","Contactez l'administrateur WhatsApp. Sur présentation du reçu de paiement initial, un nouveau code vous sera attribué gratuitement pour votre nouvel appareil. Pour les données du cahier d'appel, hélas, elles sont liées à l'appareil — d'où l'importance d'exporter régulièrement (fonctionnalité en cours de développement)."]]],
+["💡 Astuces & bonnes pratiques",[
+ ["Comment utiliser au mieux les cartes « flip » en classe ?","Trois idées : (1) devinette — projetez la face formule et demandez aux élèves de prédire l'exemple avant de retourner ; (2) rallye — par binômes, qui trouve le plus d'exemples en 3 min ; (3) évaluation — montrez la face exemple, les élèves doivent retrouver la formule. Cette réversibilité active la mémoire à long terme."],
+ ["Que faire si ma classe n'a pas de vidéoprojecteur ?","Trois alternatives : (1) imprimez les fiches (clic droit → imprimer, sélectionnez les pages utiles) et distribuez-les ; (2) recopiez la formule clé au tableau noir pendant que l'application affiche l'exemple sur votre téléphone ; (3) demandez à un élève de lire la formule à voix haute pendant que vous l'écrivez."],
+ ["Comment gérer la coupure d'électricité en cours de séance ?","Prévoyez toujours : (1) une batterie de secours ou un ordinateur chargé ; (2) une version imprimée de la fiche du jour en secours ; (3) un plan B « sans écran » (exercice au tableau, jeu de rôle). L'application hors-ligne reprend exactement là où vous étiez quand le courant revient — aucune donnée n'est perdue."],
+ ["Les élèves peuvent-ils réviser seuls avec l'application ?","Oui, à condition que vous leur donniez accès à votre appareil ou qu'ils aient le leur. Les fiches sont auto-portantes : formule + exemple suffisent pour réviser. Pour un usage élève dédié, une version « élève » (sans cahier d'appel ni verrouillage) est en projet — abonnement réduit à 200 HTG/mois."]]]
+];
+
+/* ═══════════ OUTILS ═══════════ */
+const $=s=>document.querySelector(s);
+function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
+
+/* ═══════════ ABONNEMENT / VERROU (aucun code affiché) ═══════════ */
+let sub=JSON.parse(localStorage.getItem('ph_sub')||'null');
+function saveSub(){localStorage.setItem('ph_sub',JSON.stringify(sub));}
+function left(){if(!sub)return 0;if(sub.admin)return Infinity;return Math.max(0,30-Math.floor((Date.now()-sub.start)/864e5));}
+function valid(){return !!(sub&&(sub.admin||left()>0));}
+
+$('#btnAct').addEventListener('click',()=>{$('#codeForm').classList.remove('hide');$('#btnAct').classList.add('hide');$('#codeIn').focus();});
+$('#btnCancel').addEventListener('click',()=>{$('#codeForm').classList.add('hide');$('#btnAct').classList.remove('hide');$('#codeErr').textContent='';});
+$('#codeForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const c=$('#codeIn').value.trim().toUpperCase();
+  const ok=k=>{saveSub();$('#lock').classList.add('off');setTimeout(()=>$('#lock').style.display='none',650);initApp();toast(k);};
+  if(/^MET-LEKOL/.test(c)){sub={code:c,start:Date.now(),admin:true};ok("Aksè administratè aktive ✔");}
+  else if(/^PROF-\d{4}-[A-Z]{3}$/.test(c)){sub={code:c,start:Date.now(),admin:false};ok("Mèsi ! Aksè aktive pou 30 jou 🎉");}
+  else{const f=$('#codeForm');f.classList.remove('shake');void f.offsetWidth;f.classList.add('shake');
+    $('#codeErr').textContent="Kòd sa a pa valid. Verifye l epi eseye ankò.";}
+});
+
+/* ═══════════ ONGLETS ═══════════ */
+function go(id){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('act',b.dataset.t===id));
+  document.querySelectorAll('.sec').forEach(s=>s.classList.toggle('on',s.id==='sec-'+id));
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(reveal,80);
+}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>go(b.dataset.t)));
+
+/* ═══════════ SCROLL REVEAL ═══════════ */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.06});
+function reveal(){document.querySelectorAll('.rv:not(.in)').forEach(el=>io.observe(el));}
+
+/* ═══════════ COMPTEURS ═══════════ */
+let counted=false;
+function countAll(){
+  if(counted)return;counted=true;
+  document.querySelectorAll('.cnt').forEach(el=>{
+    const t=+el.dataset.n;let s=0;const step=Math.max(1,Math.round(t/38));
+    const iv=setInterval(()=>{s+=step;if(s>=t){s=t;clearInterval(iv);}el.textContent=s;},30);
+  });
+}
+
+/* ═══════════ PROVERBE + BAC ═══════════ */
+let pi=Math.floor(Date.now()/864e5)%PROVERBS.length;
+function prov(){const[kr,fr]=PROVERBS[pi];$('#provKr').textContent="« "+kr+" »";$('#provFr').textContent=fr;}
+$('#provBtn').addEventListener('click',()=>{pi=(pi+1)%PROVERBS.length;prov();});
+function bac(){const now=new Date();let t=new Date(now.getFullYear(),5,21);if(now>t)t=new Date(now.getFullYear()+1,5,21);
+  $('#bac').textContent="🎓 Bac · J-"+Math.ceil((t-now)/864e5);}
+
+/* ═══════════ RENDU DES CARTES FLIP ═══════════ */
+function cards(subject,obj){
+  let h="";
+  for(const[grp,arr]of Object.entries(obj)){
+    h+='<h3 class="grp">'+grp+'</h3><div class="grid">';
+    for(const[t,f,ex]of arr){
+      h+='<div class="flip rv s-'+subject+'" onclick="this.classList.toggle(\'on\')"><div class="flip-in">'
+        +'<div class="ff front"><span class="chip">↻ exemple au verso</span><strong class="ct">'+t+'</strong><span class="formula">'+f+'</span></div>'
+        +'<div class="ff back"><span class="chip">↻ retour</span><strong class="ct">'+t+'</strong><p>'+ex+'</p></div>'
+        +'</div></div>';
+    }
+    h+='</div>';
+  }
+  return h;
+}
+$('#mathA').innerHTML=cards('maths',M_ALG);
+$('#mathB').innerHTML=cards('maths',M_ANA)+cards('maths',M_GEO);
+$('#physCards').innerHTML=cards('phys',PHYS);
+$('#siStrip').innerHTML=SI.map(([n,s])=>'<span class="si"><b>'+s+'</b>'+n+'</span>').join('');
+$('#svtA').innerHTML=cards('svt',S_A);
+$('#svtB').innerHTML=cards('svt',S_B);
+
+/* ═══════════ RENDUS DIVERS ═══════════ */
+$('#tlBox').innerHTML=TIMELINE.map(([y,t,d])=>'<div class="tl-item rv"><span class="yr">'+y+'</span><h4>'+t+'</h4><p>'+d+'</p></div>').join('');
+$('#deptBox').innerHTML=DEPTS.map(([n,c])=>'<div class="dept"><b>'+n+'</b><span>Chef-lieu : '+c+'</span></div>').join('');
+$('#figBox').innerHTML=FIGURES.map(([d,n,b])=>'<div class="fig rv"><span class="dates">'+d+'</span><b>'+n+'</b><p>'+b+'</p></div>').join('');
+$('#constTbl').innerHTML='<table class="tbl"><thead><tr><th>Article</th><th>Contenu essentiel</th></tr></thead><tbody>'+CONST.map(([a,c])=>'<tr><td><b>'+a+'</b></td><td>'+c+'</td></tr>').join('')+'</tbody></table>';
+$('#verbsTbl').innerHTML='<table class="tbl"><thead><tr><th>Infinitive</th><th>Past Simple</th><th>Past Participle</th><th>French</th></tr></thead><tbody>'+VERBS.map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+'</td></tr>').join('')+'</tbody></table>';
+$('#tensesTbl').innerHTML='<table class="tbl"><thead><tr><th>Tense</th><th>Formation</th><th>Example</th></tr></thead><tbody>'+TENSES.map(r=>'<tr><td><b>'+r[0]+'</b></td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>').join('')+'</tbody></table>';
+$('#faqBox').innerHTML=FAQ.map(([cat,items])=>'<div class="faq-cat"><h3>'+cat+'</h3>'+items.map(([q,a])=>'<div class="fq"><button>'+q+'<span class="arr">＋</span></button><div class="fa"><p>'+a+'</p></div></div>').join('')+'</div>').join('');
+$('#faqBox').addEventListener('click',e=>{
+  const b=e.target.closest('.fq>button');if(!b)return;
+  const f=b.parentElement,a=b.nextElementSibling;
+  f.classList.toggle('open');
+  a.style.maxHeight=f.classList.contains('open')?a.scrollHeight+'px':0;
+});
+
+/* ═══════════ CALCULATRICE ═══════════ */
+let expr="";
+const KEYS=[["sin","fn"],["cos","fn"],["tan","fn"],["log","fn"],["ln","fn"],
+["C","dgr"],["√(","fn"],["(","fn"],[")","fn"],["π","fn"],
+["7","num"],["8","num"],["9","num"],["÷","op"],["x²","fn"],
+["4","num"],["5","num"],["6","num"],["×","op"],["xʸ","fn"],
+["1","num"],["2","num"],["3","num"],["−","op"],["⌫","fn"],
+["0","num"],[",","num"],["%","fn"],["+","op"],["=","eq"]];
+$('#cGrid').innerHTML=KEYS.map(([k,c])=>'<button class="ck '+c+'" data-k="'+k+'">'+k+'</button>').join('');
+$('#cGrid').addEventListener('click',e=>{const b=e.target.closest('.ck');if(b)press(b.dataset.k);});
+
+function calc(s){
+  s=s.replace(/×/g,"*").replace(/÷/g,"/").replace(/−/g,"-").replace(/,/g,".")
+     .replace(/π/g,"(PI)").replace(/%/g,"/100").replace(/√\(/g,"sqrt(").replace(/\^/g,"**");
+  const o=(s.match(/\(/g)||[]).length,c=(s.match(/\)/g)||[]).length;
+  if(o>c)s+=")".repeat(o-c);
+  if(!s||/[+\-*/^(.]$/.test(s))return null;
+  const rad=x=>x*Math.PI/180;
+  const F=new Function("PI","sqrt","sin","cos","tan","log","ln","'use strict';return ("+s+");");
+  return F(Math.PI,Math.sqrt,x=>Math.sin(rad(x)),x=>Math.cos(rad(x)),x=>Math.tan(rad(x)),Math.log10,Math.log);
+}
+function fmt(v){let n=parseFloat(v.toPrecision(12));
+  return String(n).replace(".",",").replace(/e\+(\d+)/,"×10^$1").replace(/e-(\d+)/,"×10^-$1");}
+function press(k){
+  if(k==='C')expr="";
+  else if(k==='⌫')expr=expr.slice(0,-1);
+  else if(k==='x²')expr+="^2";
+  else if(k==='xʸ')expr+="^";
+  else if(k==='='){try{const v=calc(expr);if(v===null||!isFinite(v)){$('#cRes').textContent="Erreur";return;}expr=fmt(v);}catch(e){$('#cRes').textContent="Erreur";return;}}
+  else expr+=k;
+  renderCalc();
+}
+function renderCalc(){
+  $('#cExpr').textContent=expr||"0";
+  if(!expr){$('#cRes').textContent="";return;}
+  try{const v=calc(expr);$('#cRes').textContent=(v!==null&&isFinite(v))?"= "+fmt(v):"";}
+  catch(e){$('#cRes').textContent="";}
+}
+document.addEventListener('keydown',e=>{
+  if(!$('#sec-calc').classList.contains('on'))return;
+  const tag=(document.activeElement||{}).tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA')return;
+  const k=e.key;let m=null;
+  if(/^[0-9]$/.test(k))m=k;
+  else if(k==='+')m='+';
+  else if(k==='-')m='−';
+  else if(k==='*')m='×';
+  else if(k==='/')m='÷';
+  else if(k==='^'||k==='('||k===')')m=k;
+  else if(k===','||k==='.')m=',';
+  else if(k==='Enter'||k==='='){m='=';e.preventDefault();}
+  else if(k==='Escape')m='C';
+  else if(k==='Backspace'){m='⌫';e.preventDefault();}
+  if(m!==null)press(m);
+});
+
+/* ═══════════ CAHIER D'APPEL ═══════════ */
+let studs=JSON.parse(localStorage.getItem('ph_studs')||'null')||
+ ["Wisner Augustin","Fabiola Désir","Ricardo Milfort","Nadège François","Stevenson Jacques","Mirlande Constant","Kevin Prophète","Roseline Baptiste","Davidson Noël","Stéphania Michel","Jefferson Toussaint","Manoucheka Pierre"].map(n=>({n,p:null}));
+let hist=JSON.parse(localStorage.getItem('ph_hist')||'[]');
+function saveA(){localStorage.setItem('ph_studs',JSON.stringify(studs));localStorage.setItem('ph_hist',JSON.stringify(hist));}
+function mark(i,v){studs[i].p=(studs[i].p===v?null:v);renderA();}
+function delS(i){studs.splice(i,1);renderA();saveA();}
+function updCount(){
+  $('#cP').textContent=studs.filter(s=>s.p===true).length;
+  $('#cA').textContent=studs.filter(s=>s.p===false).length;
+}
+function renderA(){
+  $('#studList').innerHTML=studs.map((s,i)=>'<div class="srow '+(s.p===true?'sp':s.p===false?'sa':'')+'">'
+    +'<span class="sname">'+s.n+'</span><span class="sbtns">'
+    +'<button class="sb pb" onclick="mark('+i+',true)">Prezan</button>'
+    +'<button class="sb ab" onclick="mark('+i+',false)">Absan</button>'
+    +'<button class="sb xb" onclick="delS('+i+')" title="Retire">✕</button></span></div>').join('')
+    ||'<p class="empty">Okenn elèv — ajoute non yo anwo a.</p>';
+  updCount();renderHist();
+}
+function renderHist(){
+  $('#histList').innerHTML=hist.slice().reverse().map(h=>'<div class="hitem"><b>'+h.d+'</b>'
+    +'<span class="hp">✔ '+h.p.length+'</span><span class="ha">✘ '+h.a.length+'</span>'
+    +(h.a.length?'<small>Absan : '+h.a.join(", ")+'</small>':'')+'</div>').join('')
+    ||'<p class="empty">Okenn apèl anrejistre pou kounye a.</p>';
+  const cnt={};hist.forEach(h=>h.a.forEach(n=>cnt[n]=(cnt[n]||0)+1));
+  const top=Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
+  $('#topAbs').innerHTML=top.map(([n,c])=>'<div class="titem"><span>'+n+'</span><b>'+c+' fwa</b></div>').join('')
+    ||'<p class="empty">Pèsonn poko make absan. 👍</p>';
+}
+$('#addBtn').addEventListener('click',()=>{const v=$('#newStud').value.trim();if(v){studs.push({n:v,p:null});$('#newStud').value="";renderA();saveA();}});
+$('#newStud').addEventListener('keydown',e=>{if(e.key==='Enter')$('#addBtn').click();});
+$('#allP').addEventListener('click',()=>{studs.forEach(s=>s.p=true);renderA();});
+$('#saveCall').addEventListener('click',()=>{
+  const d=new Date().toISOString().slice(0,10);
+  const p=studs.filter(s=>s.p===true).map(s=>s.n);
+  const a=studs.filter(s=>s.p!==true).map(s=>s.n);
+  hist=hist.filter(h=>h.d!==d);hist.push({d,p,a});
+  saveA();renderA();toast("💾 Apèl anrejistre ✔ "+d);
+});
+
+/* ═══════════ INITIALISATION ═══════════ */
+function initApp(){
+  $('#app').classList.remove('hide');
+  bac();prov();renderA();
+  $('#subChip').textContent=sub.admin?'🔓 Accès illimité':'🔓 J-'+left()+' restants';
+  $('#stDays').textContent=sub.admin?'∞':left();
+  countAll();reveal();
+}
+if(valid()){$('#lock').style.display='none';initApp();}
+</script>
+</body>
+</html>
